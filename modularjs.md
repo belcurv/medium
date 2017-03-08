@@ -1,8 +1,18 @@
-# INTRO
+#Introduction
 
-// todo
+This article is aimed at beginner to intermediate JavaScript developers who already have some experience writing JavaScript, but who may not yet know how to structure code into modules, or why the modular design pattern is valuable.
 
-# NITTY
+You have surely already heard the cardinal programming rule _Don't Repeat Yourself_: if you have to write some snippet of code more than once, stick that code in a function instead.  We can extend that idea further - from one project to another - by breaking our monolithic applications into smaller, *reusable* modules.  Want to use some utility module in a new application?  No need to re-write the whole thing; just copy your previously-written file into your current project and link to it with a `<script>` tag.  The time savings alone makes this a worthwhile endeavor.
+
+But there's another, possibly greater benefit to modular design: it makes collaborating with other people a whole lot easier.  When you are working with a team of developers, where each of you is creating a part of a larger application, you will eventually need to merge all of those separate parts together.  If your team agrees on a modular design structure in advance, joining everything up at the end is trivially easy.  Develop modular habits today and you'll be the hero of your team tomorrow.
+
+Finally, modular design patterns make it *much easier* to read your code.  You should personally care about this because you (or others - see previous paragraph) will eventually have to revisit some code and make sense of it all.  This is made easier with modular, self-contained chunks of code.
+
+This article assumes you have some familiarity with client-side (front-end) JavaScript.  My examples will use a small amount of jQuery, but no other libraries or frameworks.  I will mention IIFEs and closures, but not go into too much detail about them here.  The Gulp section assumes you have only basic familiarity with Node (really just `require` and `pipe`) and NPM (for installing Gulp and its accessory packages).  There is a Definitions / Resources section at the very end.
+
+With that out of the way, let's be about it!
+
+#Application Structure 
 
 When I'm writing vanilla JS or jQuery front-end apps, I structure the project files like this:
 
