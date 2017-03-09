@@ -108,7 +108,7 @@ That's it! If you're used to seeing/writing volumes of code inside of `$(documen
 
 Because we use `app.js` to _bootstrap_ our other modules, it makes sense that `index.html` has to load those modules first. If the modules were loaded after `app.js`, calling their `.init()` methods would fail.
 
-We will write each module in a separate file to promote reuse. And we'll adopt the style known as the "revealing module pattern" (sometimes shortened to just "module pattern"). The "revealing" qualifier hints at the module's internal structure: some features are private, others are _revealed_ publicly.
+We will write each module in a separate file to promote reuse. And we'll adopt the style known as the [revealing module pattern](https://addyosmani.com/resources/essentialjsdesignpatterns/book/#revealingmodulepatternjavascript). The "revealing" qualifier hints at the module's internal structure: some features are private, others are _revealed_ publicly.
 
 Here's an example:
 
