@@ -56,9 +56,9 @@ Let's begin with `index.html`.  This file will load our CSS and JavaScript files
   <div class="container">
 
     <!-- features go here -->
-    <div id="background">
-    <div id="greeting">
-    <div id="quote">
+    <div id="background"></div>
+    <div id="greeting"></div>
+    <div id="quote"></div>
 
   </div>
 
@@ -110,7 +110,7 @@ var Backgrounds = (function() {
 
     var imgUrl = 'https://source.unsplash.com/category/nature/1920x1080';
 
-    $.when(buildElement(imgUrl)).done(render);
+    $.when(assembleElement(imgUrl)).done(render);
 
   }
 
@@ -120,7 +120,7 @@ var Backgrounds = (function() {
    * @params    [string]   source   [the image API endpoint]
    * @returns   [object]            [promise object]
   */
-  function loadImg(source) {
+  function assembleElement(source) {
 
     return $.Deferred(function (task) {
 
