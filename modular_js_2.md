@@ -52,6 +52,7 @@ Let's begin with `index.html`.  This file will load our CSS and JavaScript files
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 
   <!-- ===================== css ====================== -->
+  <link rel="stylesheet" href="/src/css/style.css">
 
 </head>
 <body>
@@ -72,7 +73,7 @@ Let's begin with `index.html`.  This file will load our CSS and JavaScript files
 </html>
 ```
 
-We might as well begin our main CSS stylesheet now too.  Create a new file `style.css` in your `/src/css` folder:
+Let's create our main CSS stylesheet now too.  Create a new file `style.css` in your `/src/css` folder:
 
 ```css
 /* /src/css/style.css */
@@ -107,12 +108,12 @@ When planning any app, begin by thinking about what it needs.  We already know o
 For example, the backgrounds module needs to:
 
 1. cache DOM elements,
-2. asynchronously call images API,
+2. asynchronously get an image,
 3. assemble an element using the image we received,
 4. render that to the DOM, and
 5. initialize itself somehow.
 
-You can take that list and convert it to pseudo code in your module - instant function documentation!
+You modify that list to use as pseudo code in your module - instant function documentation!  Create new file `backgrounds.js` in your `/src/js/` folder:
 
 ```javascript
 /* /src/js/backgrounds.js */
@@ -126,29 +127,21 @@ var Backgrounds = (function() {
 
   /* =================== private methods ================= */
 
-  /* cache DOM elements
-  */
+  // cache DOM elements
   function cacheDom() {
     DOM.$background = $('#background');
   }
   
 
-  /* coordinate async assembly of image element and rendering
-  */
+  // coordinate async assembly of image element and rendering
   function loadImage() {
-
     var imgUrl = 'https://source.unsplash.com/category/nature/1920x1080';
 
     $.when(assembleElement(imgUrl)).done(render);
-
   }
 
 
-  /* assemble image element
-   *
-   * @params    [string]   source   [the image API endpoint]
-   * @returns   [object]            [promise object]
-  */
+  // assemble the image element
   function assembleElement(source) {
 
     return $.Deferred(function (task) {
@@ -163,16 +156,12 @@ var Backgrounds = (function() {
   }
 
 
-  /* render to the DOM
-   *
-   * @params   [object]   image   [image element object]
-  */
+  // render DOM
   function render(image) { 
 
     DOM.$background
       .append(image)
       .css('opacity', 1);
-
   }
 
 
@@ -180,15 +169,12 @@ var Backgrounds = (function() {
 
   // main init method
   function init() {
-  
     cacheDom();
     loadImage();
-    
   }
 
 
   /* =============== export public methods =============== */
-
   return {
     init: init
   };
@@ -196,9 +182,9 @@ var Backgrounds = (function() {
 }());
 ```
 
-The above module just sets the CSS background of our target `<div>` once it receives an image from [unSplash](link).  There's a bit of promise voodoo going on in there, because getting the image is [asynchronous](link) and we can't set a `background-image` property until we actually have an image!  So we have to wait, which promises happen to excel at.  We'll see them again in the random quote feature.
+The above module sets the CSS background of our target `<div>` once it has received an image from [unSplash](https://source.unsplash.com).  There's a bit of [promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) voodoo going on in there, because getting the image is [asynchronous](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Synchronous_and_Asynchronous_Requests) and we can't set a `background-image` property until we actually have an image!  So we have to wait; promises happen to excel at waiting.  We'll see them again in the random quote feature.
 
-Now that we have a module, we can load it with a `<script>` tag in our `index.html` file.  But our app doesn't do anything yet because we haven't writen our `app.js`. So let's do that:
+Now that we have a module, we can load it with a `<script>` tag in our `index.html` file.  But our app won't do anything yet because we haven't writen our `app.js`.  Remember: `app.js` bootstraps our modules. So let's write one - create new file `app.js` in your `/src/js/` folder:
 
 ```javascript
 /* /src/js/app.js */
@@ -210,11 +196,11 @@ $(document).ready(function () {
 });
 ```
 
-That's it for now.  We only have one module and it only has a single public method, which is called once the document has finished loading.  You can now launch `index.html` in a browser and it will fetch and display a random image.  Yay - it works!  Also boo - it looks like @$$!  Let's address that with a bit of CSS.  
+That's it for now.  We only have one module and it has only one public method, which is called once the document has finished loading.  You can now launch `index.html` in a browser and it will fetch and display a random image.  Yay - it works!  Also boo - it looks like @$$!  Let's address that with a bit of CSS.  
 
-> Just like we write separate JavaScript modules for each feature, we will also write separate external CSS stylesheets for each feature.  This further promotes code re-use - copy a previously-written module's JavaScript and CSS files into your new project - and makes your code more readable.  Don't forget to `<link>` to the separate stylesheet(s) in the `<head>` of your `index.html`.
+> Just like we write separate JavaScript modules for each feature, we will also write separate external CSS stylesheets for each feature.  This makes it easier to reuse a module _and its styles_ in other applications and makes code more readable by making it smaller.  Don't forget to `<link>` to the separate stylesheet(s) in the `<head>` of your `index.html`.
 
-Create a new file `backgrounds.css` in your `/src/css` folder:
+Create a new file `backgrounds.css` in your `/src/css/` folder:
 
 ```css
 /* /src/css/backgrounds.css */
@@ -245,6 +231,8 @@ Create a new file `backgrounds.css` in your `/src/css` folder:
 }
 ```
 
+The above CSS positions, sizes and anchors the image on the page, and sets the opacity of the containing `<div>` to `0` - meaning it will be invisible.  Refer to our module's `render()` function above - it _fades-in_ the background by changing the element's opacity after appending the image to the containing element.
+
 > Remember to _namespace_ each selector in your module stylesheets.  This is so you don't accidentally override some other stylesheet's rule.  For example, above we only target our `#backgrounds` element and its child elements: `#backgrounds > img`.  You might have other modules with images, and we wouldn't want our background image's rules to affect them.  Namespacing selectors to each feature or module will help prevent this.
 
 And with that, the backgrounds feature is done!  The other modules follow similar patterns.
@@ -259,7 +247,7 @@ What does this module need to do?
 4. render the greeting to the DOM, and
 5. initialize itself
 
-Let's do it - create a new file `greeting.js` in your `/src/js/` folder:
+We'll add a random name picker for fun. Create new file `greeting.js` in your `/src/js/` folder:
 
 ```javascript
 /* /src/js/greeting.js */
@@ -286,8 +274,7 @@ var Greeting = (function() {
   }
     
     
-  /* pick a name from names array
-  */
+  // pick a name from names array
   function selectName() {
     var ind = Math.floor(Math.random() * names.length);
         
@@ -295,8 +282,7 @@ var Greeting = (function() {
   }
 
     
-  /* assemble time-based greeting message
-  */
+  // assemble time-based greeting message
   function makeMessage() {
     var timeOfDay,
         theDate = new Date(),
@@ -314,8 +300,7 @@ var Greeting = (function() {
   }
     
     
-  /* render DOM
-  */
+  // render DOM
   function displayMessage() {
     DOM.$greeting
       .text(makeMessage());
@@ -324,8 +309,7 @@ var Greeting = (function() {
     
   /* =================== public methods ================== */
     
-  /* main init method
-  */
+  // main init method
   function init() {
     cacheDom();
     displayMessage();
@@ -333,7 +317,6 @@ var Greeting = (function() {
     
     
   /* =============== export public methods =============== */
- 
   return {
     init: init
   };
@@ -341,7 +324,7 @@ var Greeting = (function() {
 }());
 ```
 
-The above module picks a random name from the `names` array and crafts a greeting depending on the current time.  Add a new `<script>` tag to `index.html` for the new greeting module.  And include it in `app.js`:
+The above module crafts a custom greeting with a random name from the `names` array, and a message that depends on the current time.  Add a new `<script>` tag to `index.html` for the new greeting module.  And include a call to the module's public `init()` method in `app.js`:
 
 ```javascript
 /* /src/js/app.js */
@@ -354,7 +337,7 @@ $(document).ready(function () {
 });
 ```
 
-Let's quickly style our greeting.  Add a new file `greeting.css` to the `/src/css` folder:
+Let's quickly style the greeting.  Add a new file `greeting.css` to the `/src/css/` folder:
 
 ```css
 /* /src/css/greeting.css */
@@ -368,3 +351,5 @@ Let's quickly style our greeting.  Add a new file `greeting.css` to the `/src/cs
   font-weight: bold;
 }
 ```
+
+Reload your browser and be greeted!
