@@ -40,7 +40,7 @@ We're going to use the 'by type' structure presented in part 1.  To begin, creat
 
 Let's begin with `index.html`.  This file will load our CSS and JavaScript files, and set up "containers" for our feature modules to attach themselves to.  It's enough to start with a basic html5 document, with nothing more than a link to jQuery and a containers for our features.  We'll be adding to this as we go.
 
-```
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -75,52 +75,98 @@ Let's begin with `index.html`.  This file will load our CSS and JavaScript files
 
 We're going to modify the example module presented in part 1 of this series.
 
-```
-var Background = (function() {
+When planning any app, begin by thinking about what it needs.  We already know our app needs three features.  Next: what do those features need?  This is how you structure your modules.
 
-'use strict';
+For example, the backgrounds module needs to:
 
-// placeholder for cached DOM elements
-var DOM = {};
+1. cache DOM elements,
+2. asynchronously call images API,
+3. assemble an element using the image we received,
+4. render that to the DOM, and
+5. initialize itself somehow.
 
-/* =================== private methods ================= */
+You can take that list and convert it to pseudo code in your module - instant function documentation!
 
-// cache DOM elements
-function cacheDom() {
-DOM.$background = $('#background');
-}
+```javascript
+var Backgrounds = (function() {
 
-// fetch random image from unSplash API
-function getImage() {
+  'use strict';
 
-} 
+  // placeholder for cached DOM elements
+  var DOM = {};
 
-// render DOM
-function render() {
-DOM.$background
+  /* =================== private methods ================= */
+
+  /* cache DOM elements
+  */
+  function cacheDom() {
+    DOM.$background = $('#background');
+  }
+  
+
+  /* coordinate async assembly of image element and rendering
+  */
+  function loadImage() {
+
+    var imgUrl = 'https://source.unsplash.com/category/nature/1920x1080';
+
+    $.when(buildElement(imgUrl)).done(render);
+
+  }
 
 
+  /* assemble image element
+   *
+   * @params    [string]   source   [the image API endpoint]
+   * @returns   [object]            [promise object]
+  */
+  function loadImg(source) {
 
-}
+    return $.Deferred(function (task) {
 
-/* =================== public methods ================== */
+      var image = new Image();
+      image.onload = function() { task.resolve(image); }; 
+      image.onerror = function() { task.reject(); };
+      image.src = source;
 
-// main init method
-function init() {
-cacheDom();
-getImage();
-}
+    }).promise();
 
-/* =============== export public methods =============== */
+  }
 
-return {
-init: init
-};
+
+  /* render to the DOM
+   *
+   * @params   [object]   image   [image element object]
+  */
+  function render(image) { 
+
+    DOM.$background
+      .append(image)
+      .css('opacity', 1);
+
+  }
+
+
+  /* =================== public methods ================== */
+
+  // main init method
+  function init() {
+  
+    cacheDom();
+    loadImage();
+    
+  }
+
+  /* =============== export public methods =============== */
+
+  return {
+    init: init
+  };
 
 }());
 ```
 
-``` 
+```javascript
 // app.js
 $(document).ready(function () {
  
