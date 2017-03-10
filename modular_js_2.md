@@ -36,7 +36,7 @@ We're going to use the 'by type' structure presented in part 1.  To begin, creat
 | index.html
 ```
 
-###The Nitty and the Gritty
+###Scaffolding
 
 Let's begin with `index.html`.  This file will load our CSS and JavaScript files, and set up "containers" for our feature modules to attach themselves to.  It's enough to start with a basic html5 document, with nothing more than a links to a CSS font and jQuery and containers for our features.  We'll be adding to this as we go.
 
@@ -99,7 +99,7 @@ body {
 }
 ```
 
-**Random Background Feature**
+###Random Background Feature
 
 We're going to modify the example module presented in part 1 of this series.
 
@@ -236,7 +236,7 @@ The above CSS positions, sizes and anchors the image on the page, and sets the o
 
 And with that, the backgrounds feature is done!  The other modules follow similar patterns.
 
-**Greeting Feature**
+###Greeting Feature
 
 What does this module need to do?
 
@@ -349,4 +349,92 @@ Let's quickly style the greeting.  Add a new file `greeting.css` to the `/src/cs
 }
 ```
 
-Reload your browser and be greeted!
+Reload your browser and be greeted!  On to the final feature.
+
+###Random Quote Feature
+
+Just like the previous modules, begin by asking what we need this module to do:
+
+1. cache DOM elements,
+2. fetch a random quote from a remote API,
+3. process the JSON response,
+4. render the quote to the DOM, and
+5. initialize itself
+
+Create new file `quotes.js` in your `/src/js/` folder:
+
+```javascript
+/* /src/js/quotes.js */
+
+var Quotes = (function () {
+    
+  'use strict';
+
+  var DOM = {}
+  
+
+  // cache DOM elements
+  function cacheDom() {
+    DOM.$quoteFeature = $('#quote');
+  }
+  
+  
+  // get random quote
+  function getQuote() {
+
+    var api = {
+        endpoint : 'https://quotesondesign.com/wp-json/posts',
+        params   : {
+          'filter[orderby]'        : 'rand',
+          'filter[posts_per_page]' : 1,
+          'processdate'            : (new Date()).getTime()
+        }
+    };
+
+    // do the work
+    $.getJSON(api.endpoint, api.params)
+      .then(renderQuote)
+      .catch(handleError);
+    }
+
+
+    // Clean quote response strings
+    function clean(str) {
+    
+      var pTagRex = /(<([^>]+)>)|(&lt;([^>]+)&gt;)/ig,
+          text = document.createElement("textarea");
+
+      // set element = html quote string
+      text.innerHTML = str;
+
+      // .value converts 'special entities' to regular text.
+      // .replace removes the <p> tags
+      return text.value.replace(pTagRex, '');
+  }
+
+
+  // render
+  function renderQuote(response) {
+    
+    var quote = clean(response[0].content)
+    
+    DOM.$quoteFeature
+      .attr('href', response[0].link)
+      .attr('target', '_blank')
+      .html(quote);
+  }
+
+
+  // handle error
+  function handleError(err) {
+    console.log(err);
+  }
+
+
+  // export public methods
+  return {
+    getQuote: getQuote
+  };
+
+}());
+```
