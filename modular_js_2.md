@@ -373,6 +373,8 @@ var Quotes = (function () {
   var DOM = {}
   
 
+  /* =================== private methods ================= */
+  
   // cache DOM elements
   function cacheDom() {
     DOM.$quoteFeature = $('#quote');
@@ -395,21 +397,21 @@ var Quotes = (function () {
     $.getJSON(api.endpoint, api.params)
       .then(renderQuote)
       .catch(handleError);
-    }
+  }
 
 
-    // Clean quote response strings
-    function clean(str) {
+  // Clean quote response strings
+  function clean(str) {
     
-      var pTagRex = /(<([^>]+)>)|(&lt;([^>]+)&gt;)/ig,
-          text = document.createElement("textarea");
+    var pTagRex = /(<([^>]+)>)|(&lt;([^>]+)&gt;)/ig,
+        text = document.createElement("textarea");
 
-      // set element = html quote string
-      text.innerHTML = str;
+    // set element = html quote string
+    text.innerHTML = str;
 
-      // .value converts 'special entities' to regular text.
-      // .replace removes the <p> tags
-      return text.value.replace(pTagRex, '');
+    // .value converts 'special entities' to regular text.
+    // .replace removes the <p> tags
+    return text.value.replace(pTagRex, '');
   }
 
 
@@ -429,11 +431,18 @@ var Quotes = (function () {
   function handleError(err) {
     console.log(err);
   }
-
-
-  // export public methods
+  
+  
+  /* =================== public methods ================== */
+  function init() {
+    cacheDom();
+    getQuote();
+  }
+    
+    
+  /* =============== export public methods =============== */
   return {
-    getQuote: getQuote
+    init: init
   };
 
 }());
