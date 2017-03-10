@@ -248,7 +248,7 @@ What does this module need to do?
 
 Let's do it - create a new file `greeting.js` in your `/src/js/` folder:
 
-```
+```javascript
 var Greeting = (function() {
     
   var DOM = {},
