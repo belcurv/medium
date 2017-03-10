@@ -249,11 +249,12 @@ What does this module need to do?
 Let's do it - create a new file `greeting.js` in your `/src/js/` folder:
 
 ```javascript
+/* /src/js/greeting.js */
+
 var Greeting = (function() {
     
   var DOM = {},
-      theDate,
-      defaultNames = [
+      names = [
         'handsome',
         'smarty pants',
         'good looking',
@@ -272,15 +273,17 @@ var Greeting = (function() {
   }
     
     
-  // pick a name from defaultNames array
+  /* pick a name from names array
+  */
   function selectName() {
-    var ind = Math.floor(Math.random() * defaultNames.length);
+    var ind = Math.floor(Math.random() * names.length);
         
-    return defaultNames[ind];
+    return names[ind];
   }
 
     
-  // assemble time-based greeting message
+  /* assemble time-based greeting message
+  */
   function makeMessage() {
     var timeOfDay,
         theDate = new Date(),
@@ -298,7 +301,8 @@ var Greeting = (function() {
   }
     
     
-  // render DOM and call
+  /* render DOM
+  */
   function displayMessage() {
     DOM.$greeting
       .text(makeMessage());
@@ -307,7 +311,8 @@ var Greeting = (function() {
     
   /* =================== public methods ================== */
     
-  // main init method
+  /* main init method
+  */
   function init() {
     cacheDom();
     displayMessage();
@@ -321,4 +326,33 @@ var Greeting = (function() {
   };
     
 }());
+```
+
+The above module picks a random name from the `names` array and crafts a greeting depending on the current time.  Add a new `<script>` tag to `index.html` for the new greeting module.  And include it in `app.js`:
+
+```javascript
+/* /src/js/app.js */
+
+$(document).ready(function () {
+
+  Backgrounds.init();
+  Greeting.init();
+
+});
+```
+
+Let's quickly style our greeting.  Add a new file `greeting.css` to the `/src/css` folder:
+
+```css
+/* /src/css/greeting.css */
+
+/* ============ greeting feature ============ */
+
+#greeting {
+	flex: 1 auto;
+	text-align: center;
+	text-shadow: 0 0 30px #000;
+	font-size: 4em;
+	font-weight: bold;
+}
 ```
