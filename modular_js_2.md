@@ -38,7 +38,7 @@ We're going to use the 'by type' structure presented in part 1.  To begin, creat
 
 ###The Nitty and the Gritty
 
-Let's begin with `index.html`.  This file will load our CSS and JavaScript files, and set up "containers" for our feature modules to attach themselves to.  It's enough to start with a basic html5 document, with nothing more than a link to jQuery and a containers for our features.  We'll be adding to this as we go.
+Let's begin with `index.html`.  This file will load our CSS and JavaScript files, and set up "containers" for our feature modules to attach themselves to.  It's enough to start with a basic html5 document, with nothing more than a links to a CSS font and jQuery and containers for our features.  We'll be adding to this as we go.
 
 ```html
 <!DOCTYPE html>
@@ -47,19 +47,20 @@ Let's begin with `index.html`.  This file will load our CSS and JavaScript files
   <meta charset="UTF-8">
 
   <title>Modular Random Quote Machine</title>
+  
+  <!-- ==================== fonts ===================== -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
 
   <!-- ===================== css ====================== -->
 
 </head>
 <body>
 
+  <div id="background"></div>
+  
   <div class="container">
-
-    <!-- feature containers -->
-    <div id="background"></div>
     <div id="greeting"></div>
     <div id="quote"></div>
-
   </div>
 
   <!-- =============== vendor javascript ================ -->
@@ -80,8 +81,20 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: #222;
+}
+
+body {
+  background-color: #222;
   color: #fff;
+  font-family: 'Roboto Condensed', sans-serif;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 ```
 
@@ -349,10 +362,9 @@ Let's quickly style our greeting.  Add a new file `greeting.css` to the `/src/cs
 /* ============ greeting feature ============ */
 
 #greeting {
-	flex: 1 auto;
-	text-align: center;
-	text-shadow: 0 0 30px #000;
-	font-size: 4em;
-	font-weight: bold;
+  text-align: center;
+  text-shadow: 0 0 30px #000;
+  font-size: 4em;
+  font-weight: bold;
 }
 ```
