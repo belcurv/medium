@@ -205,7 +205,6 @@ Create a new file `backgrounds.css` in your `/src/css/` folder:
 ```css
 /* /src/css/backgrounds.css */
 
-/* =========== background feature =========== */
 #background {
   position: fixed;
   left: 0;
@@ -341,8 +340,6 @@ Let's quickly style the greeting.  Add a new file `greeting.css` to the `/src/cs
 
 ```css
 /* /src/css/greeting.css */
-
-/* ============ greeting feature ============ */
 
 #greeting {
   text-align: center;
