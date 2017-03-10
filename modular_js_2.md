@@ -199,7 +199,7 @@ $(document).ready(function () {
 
 That's it for now.  We only have one module and it only has a single public method, which is called once the document has finished loading.  You can now launch `index.html` in a browser and it will fetch and display a random image.  Yay - it works!  Also boo - it looks like @$$!  Let's address that with a bit of CSS.  
 
->> Aside - just like we are writing separate JavaScript modules for each feature, we will write separate external CSS stylesheets for each feature.  This further promotes code re-use - copy a previously-written module's JavaScript and CSS files into your new project - and makes your code more readable.  Don't forget to `<link>` to the separate stylesheet(s) in the `<head>` of your `index.html`.
+> Just like we write separate JavaScript modules for each feature, we will also write separate external CSS stylesheets for each feature.  This further promotes code re-use - copy a previously-written module's JavaScript and CSS files into your new project - and makes your code more readable.  Don't forget to `<link>` to the separate stylesheet(s) in the `<head>` of your `index.html`.
 
 Create a new file `backgrounds.css` in your `/src/css` folder:
 
@@ -230,4 +230,95 @@ Create a new file `backgrounds.css` in your `/src/css` folder:
   width: 100vw;
   object-fit: cover;
 }
+```
+
+> Remember to _namespace_ each selector in your module stylesheets.  This is so you don't accidentally override some other stylesheet's rule.  For example, above we only target our `#backgrounds` element and its child elements: `#backgrounds > img`.  You might have other modules with images, and we wouldn't want our background image's rules to affect them.  Namespacing selectors to each feature or module will help prevent this.
+
+And with that, the backgrounds feature is done!  The other modules follow similar patterns.
+
+**Greeting Feature**
+
+What does this module need to do?
+
+1. cache DOM elements,
+2. determine the time of day,
+3. craft a greeting based on the time of day,
+4. render the greeting to the DOM, and
+5. initialize itself
+
+Let's do it - create a new file `greeting.js` in your `/src/js/` folder:
+
+```
+var Greeting = (function() {
+    
+  var DOM = {},
+      theDate,
+      defaultNames = [
+        'handsome',
+        'smarty pants',
+        'good looking',
+        'classy',
+        'junior dev',
+        'Mr Roboto'
+      ],
+      dummy = selectName();
+  
+  
+  /* =================== private methods ================= */
+    
+  // cache DOM elements
+  function cacheDom() {
+    DOM.$greeting = $('#greeting');
+  }
+    
+    
+  // pick a name from defaultNames array
+  function selectName() {
+    var ind = Math.floor(Math.random() * defaultNames.length);
+        
+    return defaultNames[ind];
+  }
+
+    
+  // assemble time-based greeting message
+  function makeMessage() {
+    var timeOfDay,
+        theDate = new Date(),
+        initialHour = theDate.getHours();
+        
+    if (initialHour < 12) {
+      timeOfDay = "morning";
+    } else if (initialHour >= 12 && initialHour < 17) {
+      timeOfDay = "afternoon";
+    } else {
+      timeOfDay = "evening";
+    }
+
+    return `Good ${timeOfDay}, ${dummy}.`;
+  }
+    
+    
+  // render DOM and call
+  function displayMessage() {
+    DOM.$greeting
+      .text(makeMessage());
+  }
+    
+    
+  /* =================== public methods ================== */
+    
+  // main init method
+  function init() {
+    cacheDom();
+    displayMessage();
+  }
+    
+    
+  /* =============== export public methods =============== */
+ 
+  return {
+    init: init
+  };
+    
+}());
 ```
