@@ -55,7 +55,7 @@ Let's begin with `index.html`.  This file will load our CSS and JavaScript files
 
   <div class="container">
 
-    <!-- features go here -->
+    <!-- feature containers -->
     <div id="background"></div>
     <div id="greeting"></div>
     <div id="quote"></div>
@@ -69,6 +69,20 @@ Let's begin with `index.html`.  This file will load our CSS and JavaScript files
 
 </body>
 </html>
+```
+
+We might as well begin our main CSS stylesheet now too.  Create a new file `style.css` in your `/src/css` folder:
+
+```css
+/* /src/css/style.css */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #222;
+  color: #fff;
+}
 ```
 
 **Random Background Feature**
@@ -88,6 +102,8 @@ For example, the backgrounds module needs to:
 You can take that list and convert it to pseudo code in your module - instant function documentation!
 
 ```javascript
+/* /src/js/backgrounds.js */
+
 var Backgrounds = (function() {
 
   'use strict';
@@ -157,6 +173,7 @@ var Backgrounds = (function() {
     
   }
 
+
   /* =============== export public methods =============== */
 
   return {
@@ -166,13 +183,51 @@ var Backgrounds = (function() {
 }());
 ```
 
+The above module just sets the CSS background of our target `<div>` once it receives an image from [unSplash](link).  There's a bit of promise voodoo going on in there, because getting the image is [asynchronous](link) and we can't set a `background-image` property until we actually have an image!  So we have to wait, which promises happen to excel at.  We'll see them again in the random quote feature.
+
+Now that we have a module, we can load it with a `<script>` tag in our `index.html` file.  But our app doesn't do anything yet because we haven't writen our `app.js`. So let's do that:
+
 ```javascript
-// app.js
+/* /src/js/app.js */
+
 $(document).ready(function () {
- 
-    Quotes.init();
-    Backgrounds.init();
-    Greeting.init();
- 
+
+  Backgrounds.init();
+
 });
+```
+
+That's it for now.  We only have one module and it only has a single public method, which is called once the document has finished loading.  You can now launch `index.html` in a browser and it will fetch and display a random image.  Yay - it works!  Also boo - it looks like @$$!  Let's address that with a bit of CSS.  
+
+>> Aside - just like we are writing separate JavaScript modules for each feature, we will write separate external CSS stylesheets for each feature.  This further promotes code re-use - copy a previously-written module's JavaScript and CSS files into your new project - and makes your code more readable.  Don't forget to `<link>` to the separate stylesheet(s) in the `<head>` of your `index.html`.
+
+Create a new file `backgrounds.css` in your `/src/css` folder:
+
+```css
+/* /src/css/backgrounds.css */
+
+/* =========== background feature =========== */
+#background {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+
+  background-attachment: fixed;
+  background-position: bottom center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  opacity: 0;
+  transition: opacity 0.75s linear;
+
+  z-index: -1;
+}
+
+#background > img {
+  height: 100vh;
+  width: 100vw;
+  object-fit: cover;
+}
 ```
