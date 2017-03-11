@@ -1,0 +1,73 @@
+/* /src/css/app.css */
+html,
+body {
+  margin: 0;
+  padding: 0; }
+
+body {
+  background-color: #222;
+  color: #fff;
+  font-family: 'Roboto Condensed', sans-serif; }
+
+.container {
+  display: -ms-flexbox;
+  display: flex;
+  height: 100vh;
+  -ms-flex-direction: column;
+      flex-direction: column;
+  -ms-flex-align: center;
+      align-items: center;
+  -ms-flex-pack: center;
+      justify-content: center; }
+
+/* /src/css/backgrounds.css */
+#background {
+  background-attachment: fixed;
+  background-position: bottom center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 100vh;
+  left: 0;
+  opacity: 0;
+  position: fixed;
+  top: 0;
+  transition: opacity 0.75s linear;
+  width: 100%;
+  z-index: -1; }
+
+#background > img {
+  height: 100vh;
+  object-fit: cover;
+  width: 100vw; }
+
+/* /src/css/greeting.css */
+#greeting {
+  text-align: center;
+  text-shadow: 0 0 30px #000;
+  font-size: 4em;
+  font-weight: bold; }
+
+/* /src/css/quote.css */
+#quote {
+  border-radius: 8px;
+  font-size: 1.5em;
+  max-width: 720px;
+  padding: .5em 1em;
+  text-shadow: 0 0 40px #000;
+  width: 80%; }
+
+#quote > a {
+  text-align: justify;
+  color: #fff;
+  text-decoration: none; }
+
+#quote > a:hover {
+  color: #F33; }
+
+#quote p {
+  padding: .25em 0;
+  margin: 0; }
+
+#quote > p {
+  font-style: italic;
+  text-align: right; }
