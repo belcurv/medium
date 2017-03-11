@@ -1,82 +1,85 @@
 #Writing Modular JavaScript — Pt 2
 
-This is part 2 of a series on writing modular JavaScript applications. In part 1, I explained why modularity is desirable and presented a simple modular application design structure. In part 3, we will use Gulp, the Node task runner, to prepare our application for deployment.
+This is part 2 in a series on writing modular JavaScript applications. [Part 1](https://medium.com/@jrschwane/writing-modular-javascript-pt-1-b42a3bd23685) explained why modularity is desirable and presented a simple modular application design structure. In this part we will actually build an application using those principles. In part 3 we will use Gulp, the Node task runner, to prepare our application for deployment.
 
 ###Introduction
 
-Whereas the previous article was more conceptual, this installment is going to be very hands-on.  We will be writing a relatively simple random quote application using the modular patterns discussed in part 1.  Our application will have three features, each written in its own module, with each in a separate file.  And we'll link each of these separate modules together so they can talk to each other.
+In this instalment we will write a simple application applying the modular design concepts discussed in part 1 of the series. Our application will have multiple features, each controlled by its own module and written as a separate file.
 
-Because we will write modular code, we will satisfy the design goals set forth in part 1.  re-use (call methods anywhere), legibility (small focused modules), and team-enabling (modules all connect using a common "api").
+Remember that modular code helps satisfy the design goals we set in part 1: encourage code reuse (modules “plug-in” to projects), enhance code legibility (smaller, more-focused code is  easier to make sense of), and facilitate collaboration (modules reveal a standard API for easy interconnection).
 
-Our application is simple by design - our goal is to understand the design concepts. With that in mind, we will not get too deep into the JavaScript features used.  I assume that you have basic familiarity with client-side / front-end JavaScript and jQuery.  We will be using jQuery because it makes AJAX and DOM manipulation much easier.  We will be using promises with our AJAX calls instead of callbacks.
+The demo application will be  simple by design — our goal is to understand the modular design concepts by putting them into practice, not to explore in-depth any features of the JavaScript language. You should have some familiarity with client-side / front-end JavaScript and jQuery. We use jQuery because it simplifies AJAX and DOM manipulation. We will use a few [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) and [es6 template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals), but nothing too abstract or complex.
 
 
 ###Application Features
 
-This is going to be a random quote application, but we're going to add a little bit more to make it more interesting. There will be three main features:
+We are going to build a random quote application. If you've worked through [Free Code Camp](https://www.freecodecamp.com)'s front-end curriculum, you have probably already built one. We'll add a few extra features to ours for additional practice writing and wiring up modules.
 
-1. **greeting** - this feature will render a different greeting message based on the time of day.
+Our application will consist of:
 
-2. **random background image** - this will make ajax requests to an open image API and render the images to our view.
+1.  a **greeting** feature that displays a different message based on the time of day,
 
-3. **random quote** - this also makes AJAX requests to a 3rd-party API, process the response and render the quote to our view.
+2.  a **random background image** feature that asynchronously gets an image from a remote service and displays it as our background, and
+
+3.  a **random quote** feature that makes an AJAX request to a remote API, processes the response and displays the quote in our view.
 
 
 ###Application Structure
 
-We're going to use the 'by type' structure presented in part 1.  To begin, create a project directory and build out subdirectories to achieve the following:
+We start with a simplified version of the _by type_ structure described in part 1 of this series. We don't need a `/dist` folder or anything related to Node just yet -  we'll add those in part 3. Begin by creating a project directory that contains the following files and sub-folders:
 
 ```
 |— /src
 |    |
-|    |— /js
-|    |
 |    |— /css
+|    |
+|    |— /js
 |
 | index.html
 ```
 
-###Initial Scaffolding
+###Initial Boilerplate
 
-Let's begin with `index.html`, which will load our CSS and JavaScript files, and set up "containers" for our feature modules to attach themselves to.  It's enough to start with a basic html5 document, with nothing more than a links to a CSS font and jQuery and containers for our features.  We'll be adding to this as we go.
+Our `index.html` will load our separate application and module files, and define some "containers" for our feature modules to hook into. For now, we need a basic html5 document with a links to a font, our main stylesheet and jQuery, and `<div>`s for our features.
+
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-
+  
   <title>Modular Random Quote Machine</title>
   
   <!-- ==================== fonts ===================== -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
-
+  
   <!-- ===================== css ====================== -->
-  <link rel="stylesheet" href="/src/css/style.css">
+  <link rel="stylesheet" href="/src/css/app.css">
 
 </head>
 <body>
 
   <div id="background"></div>
-  
+
   <div class="container">
     <div id="greeting"></div>
     <div id="quote"></div>
   </div>
-
+  
   <!-- =============== vendor javascript ================ -->
   <script src="https://code.jquery.com/jquery-3.1.1.js"></script>
-
+  
   <!-- ================ our javascript ================== -->
 
 </body>
 </html>
 ```
 
-Let's create our main CSS stylesheet now too.  Create a new file `style.css` in your `/src/css` folder:
+Let's create our application's main stylesheet now too. Create a new file `app.css` in your `/src/css` folder:
 
 ```css
-/* /src/css/style.css */
+/* /src/css/app.css */
 
 html,
 body {
@@ -99,66 +102,75 @@ body {
 }
 ```
 
+With that out of the way, we can start writing our feature modules.
+
 ###Random Background Feature
 
-We're going to modify the example module presented in part 1 of this series.
+We already know that our application needs three features, but what about those features  - what do they need? You can easily structure your modules by answering that question.
 
-When planning any app, begin by thinking about what it needs.  We already know our app needs three features.  Next: what do those features need?  This is how you structure your modules.
+For example, our backgrounds module needs to:
 
-For example, the backgrounds module needs to:
+1.  cache DOM elements,
+2.  asynchronously get an image,
+3.  assemble an element using the image we received,
+4.  render that to the DOM, and
+5.  initialize itself somehow.
 
-1. cache DOM elements,
-2. asynchronously get an image,
-3. assemble an element using the image we received,
-4. render that to the DOM, and
-5. initialize itself somehow.
-
-You modify that list to use as pseudo code in your module - instant function documentation!  Create new file `backgrounds.js` in your `/src/js/` folder:
+You can convert and use that list of requirement as pseudo code in your module -  instant function documentation! Let's write the module - create a new file `background.js` in your `/src/js/` folder:
 
 ```javascript
-/* /src/js/backgrounds.js */
+* /src/js/background.js */
 
-var Backgrounds = (function() {
-
+var Background = (function() {
+  
   'use strict';
-
+  
   // placeholder for cached DOM elements
   var DOM = {};
-
+  
+  
   /* =================== private methods ================= */
-
+  
   // cache DOM elements
   function cacheDom() {
     DOM.$background = $('#background');
   }
-  
+
 
   // coordinate async assembly of image element and rendering
   function loadImage() {
-    var imgUrl = 'https://source.unsplash.com/category/nature/1920x1080';
-
-    $.when(assembleElement(imgUrl)).done(render);
+    var baseUrl = 'https://source.unsplash.com/category',
+        cat     = 'nature',
+        size    = '1920x1080';
+    $.when(buildElement(`${baseUrl}/${cat}/${size}`))
+      .done(render);
   }
 
-
+  
   // assemble the image element
-  function assembleElement(source) {
-
-    return $.Deferred(function (task) {
-
+  function buildElement(source) {
+    
+    var deferred = $.Deferred(function (task) {
       var image = new Image();
-      image.onload = function() { task.resolve(image); }; 
-      image.onerror = function() { task.reject(); };
+      
+      image.onload = function () {
+        task.resolve(image);
+      };
+      
+      image.onerror = function () {
+        task.reject();
+      };
+      
       image.src = source;
-
-    }).promise();
-
+    
+    });
+    
+    return deferred.promise();
   }
-
+  
 
   // render DOM
   function render(image) { 
-
     DOM.$background
       .append(image)
       .css('opacity', 1);
@@ -166,7 +178,7 @@ var Backgrounds = (function() {
 
 
   /* =================== public methods ================== */
-
+  
   // main init method
   function init() {
     cacheDom();
@@ -182,25 +194,25 @@ var Backgrounds = (function() {
 }());
 ```
 
-The above module sets the CSS background of our target `<div>` once it has received an image from [unSplash](https://source.unsplash.com).  There's a bit of [promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) voodoo going on in there, because getting the image is [asynchronous](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Synchronous_and_Asynchronous_Requests) and we can't set a `background-image` property until we actually have an image!  So we have to wait; promises happen to excel at waiting.  We'll see them again in the random quote feature.
+This module appends an `<img>` to our target `<div>` once it receives an image from [unsplash](https://source.unsplash.com).  There's a bit of promise voodoo going on in there, because getting the image is [asynchronous](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Synchronous_and_Asynchronous_Requests) - we can't set an image's `src` attribute until we actually have a image!  So we have to wait; promises  happen to excel at waiting.  We'll see them again in the random quote  feature.
 
-Now that we have a module, we can load it with a `<script>` tag in our `index.html` file.  But our app won't do anything yet because we haven't writen our `app.js`.  Remember: `app.js` bootstraps our modules. So let's write one - create new file `app.js` in your `/src/js/` folder:
+Now that we have a module, we should load it with a `<script>` tag in `index.html`.  But our app still won't do anything because we haven't written our `app.js`. You can manually call `Background.init()` in your browser's console, but that's ... um, not the best user experience! Remember: `app.js` bootstraps our modules. Let's instruct it to do so — create a new file `app.js` in your `/src/js/` folder:
 
 ```javascript
 /* /src/js/app.js */
 
 $(document).ready(function () {
 
-  Backgrounds.init();
+  Background.init();
 
 });
 ```
 
-That's it for now.  We only have one module and it has only one public method, which is called once the document has finished loading.  You can now launch `index.html` in a browser and it will fetch and display a random image.  Yay - it works!  Also boo - it looks like @$$!  Let's address that with a bit of CSS.  
+That's it for now  - we'll add more as we complete additional modules. Recap: our `app.js` has only one job: to call our modules' public methods once the document has finished loading. At this point, you can launch `index.html` in your browser and it will fetch and display a random image. Yay  -  it works!  Also boo  -  it looks like crap!  Let's fix that with a bit of CSS.
 
-> Just like we write separate JavaScript modules for each feature, we will also write separate external CSS stylesheets for each feature.  This makes it easier to reuse a module _and its styles_ in other applications and makes code more readable by making it smaller.  Don't forget to `<link>` to the separate stylesheet(s) in the `<head>` of your `index.html`.
+> Just like we are writing separate JavaScript files for each module, we will write separate stylesheets for each feature. This makes it even easier to reuse a whole module  -  javascript and CSS  -  in another application. Just copy both files. Don't forget to `<link>` to the separate stylesheet(s) in the `<head>` of your `index.html`.
 
-Create a new file `backgrounds.css` in your `/src/css/` folder:
+Create a new file `background.css` in your `/src/css/` folder:
 
 ```css
 /* /src/css/backgrounds.css */
@@ -230,21 +242,25 @@ Create a new file `backgrounds.css` in your `/src/css/` folder:
 }
 ```
 
-The above CSS positions, sizes and anchors the image on the page, and sets the opacity of the containing `<div>` to `0` - meaning it will be invisible.  Refer to our module's `render()` function above - it _fades-in_ the background by changing the element's opacity after appending the image to the containing element.
+The above CSS positions, sizes and anchors the image on the page, and sets the opacity of the containing `<div>` to `0` - meaning it will be invisible.  The `<div>` begins life invisible so that our module's `render()` function can _fade-in_ the background feature using a CSS opacity transition.
 
-> Remember to _namespace_ each selector in your module stylesheets.  This is so you don't accidentally override some other stylesheet's rule.  For example, above we only target our `#backgrounds` element and its child elements: `#backgrounds > img`.  You might have other modules with images, and we wouldn't want our background image's rules to affect them.  Namespacing selectors to each feature or module will help prevent this.
+> It's a good idea to _namespace_ each selector in your module stylesheets. Otherwise you may  accidentally override some other stylesheet's rules. For example, above we always include our feature's selector when referring to any child elements: `#backgrounds > img`.   We might have other modules with images, and we wouldn't want our background feature's rules to affect them.
 
-And with that, the backgrounds feature is done!  The other modules follow similar patterns.
+That wraps up the random background feature  -  not too bad, right? The other modules follow a similar pattern.
 
 ###Greeting Feature
 
-What does this module need to do?
+Define the module's requirements  -  this module needs to:
 
-1. cache DOM elements,
-2. determine the time of day,
-3. craft a greeting based on the time of day,
-4. render the greeting to the DOM, and
-5. initialize itself
+1.  cache DOM elements,
+
+2.  determine the time of day,
+
+3.  craft a greeting based on the time of day,
+
+4.  render the greeting to our view, and
+
+5.  provide us some way to initialize it.
 
 We'll add a random name picker for fun. Create new file `greeting.js` in your `/src/js/` folder:
 
@@ -285,17 +301,17 @@ var Greeting = (function() {
   function makeMessage() {
     var timeOfDay,
         theDate = new Date(),
-        initialHour = theDate.getHours();
+        theHour = theDate.getHours();
         
-    if (initialHour < 12) {
+    if (theHour < 12) {
       timeOfDay = "morning";
-    } else if (initialHour >= 12 && initialHour < 17) {
+    } else if (theHour >= 12 && theHour < 17) {
       timeOfDay = "afternoon";
     } else {
       timeOfDay = "evening";
     }
 
-    return `Good ${timeOfDay}, ${dummy}.`;
+    return `Good ${timeOfDay}, ${dummy}.`;  // :D
   }
     
     
@@ -323,50 +339,52 @@ var Greeting = (function() {
 }());
 ```
 
-The above module crafts a custom greeting with a random name from the `names` array, and a message that depends on the current time.  Add a new `<script>` tag to `index.html` for the new greeting module.  And include a call to the module's public `init()` method in `app.js`:
+This module crafts a custom greeting using a name from the `names` array and a specific  message that depends on the current time.  Add a `<script>` tag to `index.html` for our new module, and include a call to its public `init()` method in `app.js`:
 
 ```javascript
 /* /src/js/app.js */
 
 $(document).ready(function () {
 
-  Backgrounds.init();
+  Background.init();
   Greeting.init();
 
 });
 ```
 
-Let's quickly style the greeting.  Add a new file `greeting.css` to the `/src/css/` folder:
+Let's quickly style our greeting.  Add a new file `greeting.css` to the `/src/css/` folder:
 
 ```css
 /* /src/css/greeting.css */
 
 #greeting {
-  text-align: center;
-  text-shadow: 0 0 30px #000;
   font-size: 4em;
   font-weight: bold;
+  text-align: center;
+  text-shadow: 0 0 30px #000;
 }
 ```
 
-Reload your browser and be greeted!  On to the final feature.
+Reload thy browser and be greeted!  On to our final feature...
 
 ###Random Quote Feature
 
-Just like the previous modules, begin by asking what we need this module to do:
+Like we did with our previous modules, begin by defining what this module needs to do:
 
 1. cache DOM elements,
 2. fetch a random quote from a remote API,
 3. process the JSON response,
 4. render the quote to the DOM, and
-5. initialize itself
+5. provide us some way to initialize it.
 
-Create new file `quotes.js` in your `/src/js/` folder:
+> Note: you may have difficulty getting the API to respond if you are not serving your application from a proper server. Both Chrome and Firefox threw up CORS errors when I loaded the static files directly in those browsers. Brackets _Live Preview_ works fine. Hosting anywhere (GitHub pages, for example) would also work.
+
+Create a new file `quote.js` in your `/src/js/` folder:
 
 ```javascript
-/* /src/js/quotes.js */
+/* /src/js/quote.js */
 
-var Quotes = (function () {
+var Quote = (function () {
 
     'use strict';
 
@@ -378,8 +396,8 @@ var Quotes = (function () {
     // cache DOM elements
     function cacheDom() {
         DOM.$quoteFeature = $('#quote');
-        DOM.quoteLink     = $(document.createElement('a'));
-        DOM.author        = $(document.createElement('p'));
+        DOM.$quoteLink    = $(document.createElement('a'));
+        DOM.$author       = $(document.createElement('p'));
     }
 
 
@@ -391,14 +409,14 @@ var Quotes = (function () {
             params: {
                 'filter[orderby]'       : 'rand',
                 'filter[posts_per_page]': 1,
-                'processdate'           : (new Date()).getTime()
+                'cachingHack'           : (new Date()).getTime()
             }
         };
 
-        // do the work
-        $.getJSON(api.endpoint, api.params)
-            .then(renderQuote)
-            .catch(handleError);
+    // do the work
+    $.getJSON(api.endpoint, api.params)
+        .then(renderQuote)
+        .catch(handleError);
     }
 
 
@@ -411,21 +429,21 @@ var Quotes = (function () {
     // render
     function renderQuote(response) {
         
-        DOM.quoteLink
+        DOM.$quoteLink
             .attr('target', '_blank')
             .attr('href', response[0].link)
             .html(response[0].content);
         
-        DOM.author
+        DOM.$author
             .text(response[0].title);
 
         DOM.$quoteFeature
             .addClass('quoteFeature')
             .attr('href', response[0].link)
             .attr('target', '_blank')
-            .html(DOM.quoteLink)
-            .append(DOM.author);
-    }
+            .html(DOM.$quoteLink)
+            .append(DOM.$author);
+        }
 
 
     /* =================== public methods ================== */
@@ -433,8 +451,8 @@ var Quotes = (function () {
         cacheDom();
         getQuote();
     }
-
-
+    
+    
     /* =============== export public methods =============== */
     return {
         init: init
@@ -443,49 +461,44 @@ var Quotes = (function () {
 }());
 ```
 
-We use jQuery's promise syntax again in this module - in the `.getJSON()` AJAX call - to coordinate the timing of the response with subsequent function calls.  In this case, once the request successfully resolves, we `.render()` the quote (wrapped in an anchor tag) and the author's name with some chained jQuery methods.
+We use promise syntax again to coordinate the timing of the `.getJSON()` AJAX response with subsequent  function calls. In this case, once the request has successfully resolved,  we `.render()` the quote (wrapped in an anchor tag) and author's name.
 
->Thanks to Chris Coyier for granting permission to use his [Quotes on Design](https://quotesondesign.com/api-v4-0/) API.  Chris not only curates those quotes, he also founded [CSS-Tricks](https://css-tricks.com) and co-founded [Codepen](http://codepen.io). **Huge thanks!**
->
+> Special thanks to Chris Coyier for granting permission to use his [Quotes on Design API](https://quotesondesign.com/api-v4-0/).  In addition to curating all those quotes, Chris also founded [CSS-Tricks](https://css-tricks.com) and co-founded [Codepen](http://codepen.io). **Huge thanks!**
 
-Add `<script>` links to the new module in `index.html` and call the modules public method in `app.js`:
+Add a `<script>` link for our random quote module to `index.html` and call the module's public method in `app.js`:
 
 ```javascript
 $(document).ready(function () {
 
-    Backgrounds.init();
+    Background.init();
     Greeting.init();
-    Quotes.init();
+    Quote.init();
 
 });
 ```
 
-The final file we need to write is a stylesheet for the quotes module. Create new file `quotes.css` in your `/src/css/` folder:
+Almost done  -  we have one last file to write: the quote module's stylesheet. Create a new file `quote.css` in your `/src/css/` folder:
 
 ```css
-/* /src/css/quotes.css */
+/* /src/css/quote.css */
 
 #quote {
-    border-radius: 8px;
     font-size: 1.5em;
-    max-width: 720px;
     padding: .5em 1em;
-    text-shadow: 0 0 40px #000;
     width: 80%;
-}
-
-.quoteFeature {
-    background-color: rgba(0, 0, 0, .2);
+    max-width: 720px;
+    border-radius: 8px;
+    text-shadow: 0 0 40px #000;
 }
 
 #quote > a {
-    text-align: justify;
     color: #fff;
+    text-align: justify;
     text-decoration: none;
 }
 
 #quote > a:hover {
-    color: #F33;
+    color: #f33;
 }
 
 #quote p {
@@ -499,14 +512,81 @@ The final file we need to write is a stylesheet for the quotes module. Create ne
 }
 ```
 
-Be sure to link to that stylesheet in `index.html`, and reload your page. If all went well, you should be greeted by something like this:
+Add a link to the stylesheet in `index.html` and we are done. Our final `index.html` is a well-organized, logical foundation for our application:
 
-image
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    
+    <title>Modular Random Quote Machine</title>
+    
+    <!-- ==================== fonts ===================== -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
+
+    <!-- ===================== css ====================== -->
+    <link rel="stylesheet" href="src/css/background.css">
+    <link rel="stylesheet" href="src/css/greeting.css">
+    <link rel="stylesheet" href="src/css/quote.css">
+    <link rel="stylesheet" href="src/css/app.css">
+
+</head>
+<body>
+
+    <div id="background"></div>
+    
+    <div class="container">
+        <div id="greeting"></div>
+        <div id="quote"></div>
+    </div>
+
+    <!-- =============== vendor javascript ================ -->
+    <script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+
+    <!-- ================ our javascript ================== -->
+    <script src="src/js/background.js"></script>
+    <script src="src/js/greeting.js"></script>
+    <script src="src/js/quote.js"></script>
+    <script src="src/js/app.js"></script>
+  
+</body>
+</html>
+```
 
 ###Summarizing
 
-We wrote a simple _modular_ web application based on the design principles outlined in the previous article.  Each feature's application logic and CSS styles is contained in separate files, which are loaded by `index.html` and bootstrapped by `app.js`.  We used a systematic approach to build each module based on its requirements.  Each module's public methods are _namespaced_ to avoid collisions in the global scope.  Each module's CSS selectors are similarly namespaced to avoid potentially interfering with any  more generic selectors.  Time to collect on all those promised mint juleps.
+If all went well, your browser should show you  something like this:
 
-#Up Next: Preparing our Application for Deployment
+![screenshot](./assets/Screenshot.jpg)
 
-Our modules and stylesheets are working together. But the browser has to make a separate request for each of our module's six separate files. The files are not large, but the cumulative latency of all those requests delays load times. In Part 3 we will concatenate, transpile, and minify our files for deployment.
+We wrote a simple web application based on the modular design principles [outlined previously](https://medium.com/@jrschwane/writing-modular-javascript-pt-1-b42a3bd23685). Each feature's application logic and CSS is contained in separate files, loaded by `index.html` and bootstrapped by our `app.js`.  We used a systematic requirements-based approach to build each module. Our   modules' public methods are namespaced to avoid collisions in the global scope. Their CSS selectors are similarly namespaced to avoid colliding with any  generic selectors.
+
+At this point our application structure looks like this:
+
+
+```
+|-- /src
+|    |
+|    |— /css
+|    |    |
+|    |    |-- app.css
+|    |    |-- background.css
+|    |    |-- greeting.css
+|    |    |-- quote.css
+|    |
+|    |-- /js
+|    |    |
+|    |    |-- app.js
+|    |    |-- background.js
+|    |    |-- greeting.js
+|    |    |-- quote.js
+|
+| index.html
+```
+
+Looking good! Time to collect on all those promised mint juleps.
+
+#Up Next: Preparing for Deployment
+
+Our application, modules and stylesheets are working together. But the browser has to make a separate request for each of those eight separate files. While the files themselves are not large, the cumulative latency of all those requests delays application load time. In Part 3 we will prepare our application for deployment using Gulp to concatenate, transpile, and minify our files.

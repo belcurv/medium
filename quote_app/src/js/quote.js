@@ -1,9 +1,9 @@
-/* /src/js/quotes.js */
+/* /src/js/quote.js */
 
 /* jshint esversion:6 */
 /* globals $, document, console */
 
-var Quotes = (function () {
+var Quote = (function () {
 
     'use strict';
 
@@ -15,8 +15,8 @@ var Quotes = (function () {
     // cache DOM elements
     function cacheDom() {
         DOM.$quoteFeature = $('#quote');
-        DOM.quoteLink     = $(document.createElement('a'));
-        DOM.author        = $(document.createElement('p'));
+        DOM.$quoteLink    = $(document.createElement('a'));
+        DOM.$author       = $(document.createElement('p'));
     }
 
 
@@ -32,7 +32,6 @@ var Quotes = (function () {
             }
         };
 
-        // do the work
         $.getJSON(api.endpoint, api.params)
             .then(renderQuote)
             .catch(handleError);
@@ -48,20 +47,20 @@ var Quotes = (function () {
     // render
     function renderQuote(response) {
         
-        DOM.quoteLink
+        DOM.$quoteLink
             .attr('target', '_blank')
             .attr('href', response[0].link)
             .html(response[0].content);
         
-        DOM.author
-            .text(response[0].title);
+        DOM.$author
+            .html(response[0].title);
 
         DOM.$quoteFeature
-            .addClass('quoteFeature')
+            .css('background-color', 'rgba(0, 0, 0, .2)')
             .attr('href', response[0].link)
             .attr('target', '_blank')
-            .html(DOM.quoteLink)
-            .append(DOM.author);
+            .html(DOM.$quoteLink)
+            .append(DOM.$author);
     }
 
 

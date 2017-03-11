@@ -1,3 +1,6 @@
+/* jshint esversion:6 */
+/* globals $ */
+
 var Greeting = (function() {
     
     var DOM = {},
@@ -32,11 +35,11 @@ var Greeting = (function() {
     function makeMessage() {
         var timeOfDay,
             theDate = new Date(),
-            initialHour = theDate.getHours();
+            theHour = theDate.getHours();
         
-        if (initialHour < 12) {
+        if (theHour < 12) {
             timeOfDay = "morning";
-        } else if (initialHour >= 12 && initialHour < 17) {
+        } else if (theHour >= 12 && theHour < 17) {
             timeOfDay = "afternoon";
         } else {
             timeOfDay = "evening";

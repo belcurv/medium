@@ -1,7 +1,7 @@
 $(document).ready(function () {
 
-    Backgrounds.init();
+    Background.init();
     Greeting.init();
-    Quotes.init();
+    Quote.init();
 
 });

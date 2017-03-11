@@ -1,4 +1,4 @@
-/* /src/css/quotes.css */
+/* /src/css/quote.css */
 
 #quote {
     border-radius: 8px;
@@ -7,10 +7,6 @@
     padding: .5em 1em;
     text-shadow: 0 0 40px #000;
     width: 80%;
-}
-
-.quoteFeature {
-    background-color: rgba(0, 0, 0, .2);
 }
 
 #quote > a {
