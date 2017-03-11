@@ -8,7 +8,7 @@ Whereas the previous article was more conceptual, this installment is going to b
 
 Because we will write modular code, we will satisfy the design goals set forth in part 1.  re-use (call methods anywhere), legibility (small focused modules), and team-enabling (modules all connect using a common "api").
 
-Our application is simple by design - our goal is to understand the design concepts. With that in mind, we will not get too deep into the JavaScript features used.  I assume that you have basic familiarity with client-side / front-end JavaScript and jQuery.  We will be using jQuery because it makes AJAX and DOM manipulation much easier.  We will be using [promises](link) with our AJAX calls instead of callbacks.
+Our application is simple by design - our goal is to understand the design concepts. With that in mind, we will not get too deep into the JavaScript features used.  I assume that you have basic familiarity with client-side / front-end JavaScript and jQuery.  We will be using jQuery because it makes AJAX and DOM manipulation much easier.  We will be using promises with our AJAX calls instead of callbacks.
 
 
 ###Application Features
@@ -36,9 +36,9 @@ We're going to use the 'by type' structure presented in part 1.  To begin, creat
 | index.html
 ```
 
-###Scaffolding
+###Initial Scaffolding
 
-Let's begin with `index.html`.  This file will load our CSS and JavaScript files, and set up "containers" for our feature modules to attach themselves to.  It's enough to start with a basic html5 document, with nothing more than a links to a CSS font and jQuery and containers for our features.  We'll be adding to this as we go.
+Let's begin with `index.html`, which will load our CSS and JavaScript files, and set up "containers" for our feature modules to attach themselves to.  It's enough to start with a basic html5 document, with nothing more than a links to a CSS font and jQuery and containers for our features.  We'll be adding to this as we go.
 
 ```html
 <!DOCTYPE html>
@@ -445,7 +445,7 @@ var Quotes = (function () {
 
 We use jQuery's promise syntax again in this module - in the `.getJSON()` AJAX call - to coordinate the timing of the response with subsequent function calls.  In this case, once the request successfully resolves, we `.render()` the quote (wrapped in an anchor tag) and the author's name with some chained jQuery methods.
 
->Thanks to Chris Coyier for granting permission to use his [Quotes on Design]() API.  Chris not only curates those quotes, he also founded [CSS-Tricks]() and co-founded [Codepen](). **Huge thanks!**
+>Thanks to Chris Coyier for granting permission to use his [Quotes on Design](https://quotesondesign.com/api-v4-0/) API.  Chris not only curates those quotes, he also founded [CSS-Tricks](https://css-tricks.com) and co-founded [Codepen](http://codepen.io). **Huge thanks!**
 >
 
 Add `<script>` links to the new module in `index.html` and call the modules public method in `app.js`:
@@ -503,3 +503,10 @@ Be sure to link to that stylesheet in `index.html`, and reload your page. If all
 
 image
 
+###Summarizing
+
+We wrote a simple _modular_ web application based on the design principles outlined in the previous article.  Each feature's application logic and CSS styles is contained in separate files, which are loaded by `index.html` and bootstrapped by `app.js`.  We used a systematic approach to build each module based on its requirements.  Each module's public methods are _namespaced_ to avoid collisions in the global scope.  Each module's CSS selectors are similarly namespaced to avoid potentially interfering with any  more generic selectors.  Time to collect on all those promised mint juleps.
+
+#Up Next: Preparing our Application for Deployment
+
+Our modules and stylesheets are working together. But the browser has to make a separate request for each of our module's six separate files. The files are not large, but the cumulative latency of all those requests delays load times. In Part 3 we will concatenate, transpile, and minify our files for deployment.
