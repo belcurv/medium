@@ -1,0 +1,23 @@
+{
+  "name": "medium",
+  "version": "1.0.0",
+  "description": "Source code and markdown versions of each article for the Writing Modular JavaScript series:",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/belcurv/medium.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/belcurv/medium/issues"
+  },
+  "homepage": "https://github.com/belcurv/medium#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  }
+}
