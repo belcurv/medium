@@ -558,7 +558,7 @@ Add a link to the stylesheet in `index.html` and we are done. Our final `index.h
 
 If all went well, your browser should show you  something like this:
 
-![screenshot](./assets/Screenshot.jpg)
+![screenshot](../assets/Screenshot.jpg)
 
 We wrote a simple web application based on the modular design principles [outlined previously](https://medium.com/@jrschwane/writing-modular-javascript-pt-1-b42a3bd23685). Each feature's application logic and CSS is contained in separate files, loaded by `index.html` and bootstrapped by our `app.js`.  We used a systematic requirements-based approach to build each module. Our   modules' public methods are namespaced to avoid collisions in the global scope. Their CSS selectors are similarly namespaced to avoid colliding with any  generic selectors.
 
