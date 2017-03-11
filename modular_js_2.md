@@ -367,83 +367,139 @@ Create new file `quotes.js` in your `/src/js/` folder:
 /* /src/js/quotes.js */
 
 var Quotes = (function () {
-    
-  'use strict';
 
-  var DOM = {}
-  
+    'use strict';
 
-  /* =================== private methods ================= */
-  
-  // cache DOM elements
-  function cacheDom() {
-    DOM.$quoteFeature = $('#quote');
-  }
-  
-  
-  // get random quote
-  function getQuote() {
+    var DOM = {};
 
-    var api = {
-        endpoint : 'https://quotesondesign.com/wp-json/posts',
-        params   : {
-          'filter[orderby]'        : 'rand',
-          'filter[posts_per_page]' : 1,
-          'processdate'            : (new Date()).getTime()
-        }
+
+    /* =================== private methods ================= */
+
+    // cache DOM elements
+    function cacheDom() {
+        DOM.$quoteFeature = $('#quote');
+        DOM.quoteLink     = $(document.createElement('a'));
+        DOM.author        = $(document.createElement('p'));
+    }
+
+
+    // get random quote
+    function getQuote() {
+
+        var api = {
+            endpoint: 'https://quotesondesign.com/wp-json/posts',
+            params: {
+                'filter[orderby]'       : 'rand',
+                'filter[posts_per_page]': 1,
+                'processdate'           : (new Date()).getTime()
+            }
+        };
+
+        // do the work
+        $.getJSON(api.endpoint, api.params)
+            .then(renderQuote)
+            .catch(handleError);
+    }
+
+
+    // handle errors
+    function handleError(err) {
+        console.log(err);
+    }
+
+
+    // render
+    function renderQuote(response) {
+        
+        DOM.quoteLink
+            .attr('target', '_blank')
+            .attr('href', response[0].link)
+            .html(response[0].content);
+        
+        DOM.author
+            .text(response[0].title);
+
+        DOM.$quoteFeature
+            .addClass('quoteFeature')
+            .attr('href', response[0].link)
+            .attr('target', '_blank')
+            .html(DOM.quoteLink)
+            .append(DOM.author);
+    }
+
+
+    /* =================== public methods ================== */
+    function init() {
+        cacheDom();
+        getQuote();
+    }
+
+
+    /* =============== export public methods =============== */
+    return {
+        init: init
     };
-
-    // do the work
-    $.getJSON(api.endpoint, api.params)
-      .then(renderQuote)
-      .catch(handleError);
-  }
-
-
-  // Clean quote response strings
-  function clean(str) {
-    
-    var pTagRex = /(<([^>]+)>)|(&lt;([^>]+)&gt;)/ig,
-        text = document.createElement("textarea");
-
-    // set element = html quote string
-    text.innerHTML = str;
-
-    // .value converts 'special entities' to regular text.
-    // .replace removes the <p> tags
-    return text.value.replace(pTagRex, '');
-  }
-
-
-  // render
-  function renderQuote(response) {
-    
-    var quote = clean(response[0].content)
-    
-    DOM.$quoteFeature
-      .attr('href', response[0].link)
-      .attr('target', '_blank')
-      .html(quote);
-  }
-
-
-  // handle error
-  function handleError(err) {
-    console.log(err);
-  }
-  
-  
-  /* =================== public methods ================== */
-  function init() {
-    cacheDom();
-    getQuote();
-  }
-    
-    
-  /* =============== export public methods =============== */
-  return {
-    init: init
-  };
 
 }());
 ```
+
+We use jQuery's promise syntax again in this module - in the `.getJSON()` AJAX call - to coordinate the timing of the response with subsequent function calls.  In this case, once the request successfully resolves, we `.render()` the quote (wrapped in an anchor tag) and the author's name with some chained jQuery methods.
+
+>Thanks to Chris Coyier for granting permission to use his [Quotes on Design]() API.  Chris not only curates those quotes, he also founded [CSS-Tricks]() and co-founded [Codepen](). **Huge thanks!**
+>
+
+Add `<script>` links to the new module in `index.html` and call the modules public method in `app.js`:
+
+```javascript
+$(document).ready(function () {
+
+    Backgrounds.init();
+    Greeting.init();
+    Quotes.init();
+
+});
+```
+
+The final file we need to write is a stylesheet for the quotes module. Create new file `quotes.css` in your `/src/css/` folder:
+
+```css
+/* /src/css/quotes.css */
+
+#quote {
+    border-radius: 8px;
+    font-size: 1.5em;
+    max-width: 720px;
+    padding: .5em 1em;
+    text-shadow: 0 0 40px #000;
+    width: 80%;
+}
+
+.quoteFeature {
+    background-color: rgba(0, 0, 0, .2);
+}
+
+#quote > a {
+    text-align: justify;
+    color: #fff;
+    text-decoration: none;
+}
+
+#quote > a:hover {
+    color: #F33;
+}
+
+#quote p {
+    padding: .25em 0;
+    margin: 0;
+}
+
+#quote > p {
+    font-style: italic;
+    text-align: right
+}
+```
+
+Be sure to link to that stylesheet in `index.html`, and reload your page. If all went well, you should be greeted by something like this:
+
+image
+

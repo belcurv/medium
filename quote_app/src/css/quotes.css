@@ -1,0 +1,34 @@
+/* /src/css/quotes.css */
+
+#quote {
+    border-radius: 8px;
+    font-size: 1.5em;
+    max-width: 720px;
+    padding: .5em 1em;
+    text-shadow: 0 0 40px #000;
+    width: 80%;
+}
+
+.quoteFeature {
+    background-color: rgba(0, 0, 0, .2);
+}
+
+#quote > a {
+    text-align: justify;
+    color: #fff;
+    text-decoration: none;
+}
+
+#quote > a:hover {
+    color: #F33;
+}
+
+#quote p {
+    padding: .25em 0;
+    margin: 0;
+}
+
+#quote > p {
+    font-style: italic;
+    text-align: right
+}

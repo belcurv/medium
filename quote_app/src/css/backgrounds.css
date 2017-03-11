@@ -1,0 +1,22 @@
+/* /src/css/backgrounds.css */
+
+#background {
+    background-attachment: fixed;
+    background-position: bottom center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100vh;
+    left: 0;
+    opacity: 0;
+	position: fixed;
+    top: 0;
+    transition: opacity 0.75s linear;
+    width: 100%;
+    z-index: -1;
+}
+
+#background > img {
+    height: 100vh;
+    object-fit: cover;
+    width: 100vw;
+}
