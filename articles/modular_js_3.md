@@ -1,37 +1,35 @@
 #Writing Modular JavaScript  -  Pt 3
 
-This is the third and final part in an introductory series on writing modular JavaScript applications. [Part 1](https://medium.com/@jrschwane/writing-modular-javascript-pt-1-b42a3bd23685) explained why modularity is desirable and presented a simple modular application design structure. In [part 2](https://medium.com/@jrschwane/writing-modular-javascript-pt-2-d7140d15c982), we built a simple modular application based on those principles. In this concluding article we will prepare our project files for deployment.
+This is the third and final part in an introductory series on writing modular JavaScript applications. [Part 1](https://medium.com/@jrschwane/writing-modular-javascript-pt-1-b42a3bd23685) explained why modularity is desirable and presented a modular application design structure. In [part 2](https://medium.com/@jrschwane/writing-modular-javascript-pt-2-d7140d15c982), we built a simple application based on those principles. We will conclude the series by preparing our project for deployment.
 
 ![slice](../assets/slice_pt3.jpg)
 
 ###Introduction
 
-When we concluded part 2, we had a working modular web application.  We wrote our modules and stylesheets as separate files, linked together through our `index.html` and bootstrapped by our `app.js`. This is an efficient and scalable development process for all the reasons discussed in the previous articles.
+We ended part 2 with a working modular web application.  We wrote our modules and stylesheets as separate files, linked together through our `index.html` and bootstrapped by our `app.js`. This is an efficient and scalable development process for all the reasons discussed in the part 1 of the series.
 
-It’s also a process that resulted in eight separate files (not including our hosted font and jQuery). Our browser has to open and maintain eight separate http requests to retrieve each of those files. Although our files are not large and modern browsers can make these requests in parallel, in a large application the cumulative latency of all those requests would result in slower page loads. That’s never good — we should [concatenate](https://en.wikipedia.org/wiki/Concatenation) our files to increase performance.
+But it's a process that produced eight separate files. Our browser has to open and maintain eight separate http requests to retrieve each of those files, and that's before we include the hosted font or jQuery. Although our files are not large and modern browsers can make these requests in parallel, in a large application the cumulative latency of those requests would result in slower page loads. We can reduce the number of http requests through [concatenatation](https://en.wikipedia.org/wiki/Concatenation).
 
-We could also increase performance through [minification](https://en.wikipedia.org/wiki/Minification_(programming)), a kind of compression where our function and variable names are replaced with single characters, and comments, white space and line breaks are removed. This results in smaller file sizes, which should result in quicker page loads for clients.
+We can also increase performance through [minification](https://en.wikipedia.org/wiki/Minification_(programming)), a kind of compression where our function and variable names are replaced with smaller "tokens", and all comments, white space and line breaks are removed. This results in smaller file sizes, which means quicker page loads for users.
 
-Our demo application includes a feature of es6/es2015: [template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals). Template literals are amazingly useful, but their backtick delimiters cause problems for some code minifiers. To work around this problem, we should [transpile](https://en.wikipedia.org/wiki/Source-to-source_compiler) our source code from es6/es2015 to traditional every-browser-understands-it es5 JavaScript.
+Our demo application includes a feature of es6/es2015: [template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals). Template literals are amazingly useful, but their backtick delimiters cause problems for some code minifiers. Furthermore, not every browser supports es6/es2015 syntax. So we want to [transpile](https://en.wikipedia.org/wiki/Source-to-source_compiler) our source code into traditional _every-browser-understands-it_ es5 JavaScript.
 
-Finally, imagine that we wrote SASS instead of CSS. Since browsers do not natively understand SASS, we should translate that into regular CSS. We won’t actually rewrite our CSS — instead we’ll cheat a little for demonstration purposes. And while we’re at it, we should probably add all necessary vendor-prefixed selectors to make all browsers behave as expected.
+Finally, imagine that we composed our stylesheets with SASS instead of CSS. Browsers do not natively understand SASS, we want to convert that into regular CSS. We won’t actually rewrite our stylesheets — instead we’ll cheat a little for demonstration purposes. And while we’re at it, we want to add all necessary vendor-prefixed selectors so different browsers behave as expected.
 
-In this article we will use [Gulp](http://gulpjs.com/) to efficiently deal the above wish list. Gulp will process our source files and creating new production-ready files for use in preparation for deployment.
+That's a lengthly wish list.  In this article we will use [Gulp](http://gulpjs.com/) to provide solutions to each of the above "wants". Gulp will process our source files and create new production-ready files that we can use when deploying our application.
 
-###Node.js and NPM
+Although our demo is a _front-end_ application, because Gulp depends on [Node.js](https://nodejs.org/en/) - typically used in _back-end_ applications - the reader should have basic familiarity with Node and [NPM](https://www.npmjs.com/) and have them installed locally. If you do not, please refer to the [official docs](https://nodejs.org/en/download/package-manager/) for installation instructions. And if you would like to learn more, [Scotch.io](https://scotch.io/tag/node-js) has excellent Node.js resources.
 
-I assume you know what [Node.js](https://nodejs.org/en/) and [NPM](https://www.npmjs.com/) are and have them installed locally. If you do not, please refer to the [official docs](https://nodejs.org/en/download/package-manager/) for installation instructions. If you need an introduction to Node, [Scotch.io](https://scotch.io/tag/node-js) is an excellent resource.
-
-We will use only two Node-specific functions: `require` and `pipe`.  The rest of our code will use regular JavaScript. We will spend a bit of  time in the command line, but you don't need to be a terminal ninja.
+Aside from a few Node-specific functions (`require` and `pipe`), the rest of our code will use regular es5 JavaScript. We will spend a bit of time in the command line, but you needn't be a CLI ninja.
 
 ###Application Structure
 
-We finished part 2 with the following file/folder structure:
+Part 2 left us with the following file/folder structure:
 
 ```
 |-- /src
 |    |
-|    |— /css
+|    |-- /css
 |    |    |
 |    |    |-- app.css
 |    |    |-- background.css
@@ -39,16 +37,16 @@ We finished part 2 with the following file/folder structure:
 |    |    |-- quote.css
 |    |
 |    |-- /js
-|    |    |
-|    |    |-- app.js
-|    |    |-- background.js
-|    |    |-- greeting.js
-|    |    |-- quote.js
+|         |
+|         |-- app.js
+|         |-- background.js
+|         |-- greeting.js
+|         |-- quote.js
 |
 | index.html
 ```
 
-Gulp will be working on those `/src` files; we will be working mainly in the root of our project folder.
+We will work mainly in the root of our project folder; Gulp will be working on all those `/src` files.
 
 ###Initialization
 
