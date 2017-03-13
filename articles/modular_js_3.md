@@ -2,7 +2,7 @@
 
 This is part 3 of a series on writing modular JavaScript applications. [Part 1](https://medium.com/@jrschwane/writing-modular-javascript-pt-1-b42a3bd23685) explained why modularity is desirable and presented a simple modular application design structure. In [part 2](https://medium.com/@jrschwane/writing-modular-javascript-pt-2-d7140d15c982), we built a simple modular application based on those principles. In this concluding article we will prepare our files for deployment.
 
-![slice](img)
+![slice](../assets/slice_pt3.jpg)
 
 ###Introduction
 
@@ -10,9 +10,9 @@ When we concluded part 2, we had a working modular web application.  We wrote ou
 
 But eight separate files (not including our font and jQuery) means our browser has to make eight separate http requests to fetch our application's files. Although browsers make requests in parallel and even though our files not large, in a larger project the cumulative latency of all those requests will delay our application's load time. We should always strive to increase performance, especially when it can be achieved with minimal effort.
 
-We can further decrease load times through [minification](https://en.wikipedia.org/wiki/Minification_(programming)). Minification is a form of compression where function and variable names are replaced with smaller characters, and comments, whitespace and line breaks are removed. This results in smaller file sizes, which results in quicker load times for clients.
+We can further decrease load times through [minification](https://en.wikipedia.org/wiki/Minification_(programming). Minification is a form of compression where function and variable names are replaced with smaller characters, and comments, whitespace and line breaks are removed. This results in smaller file sizes, which results in quicker load times for clients.
 
-The demo application's code includes a feature of es6: [template literals]((https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals).  Template literals are very useful, but their delimiting backticks can cause problems for some minifiers. To work around this problem, we need to [transpile](https://en.wikipedia.org/wiki/Source-to-source_compiler) our code from es6 to regular every-browser-understands-it es5 JavaScript.
+The demo application's code includes a feature of es6: [template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals).  Template literals are very useful, but their delimiting backticks can cause problems for some minifiers. To work around this problem, we need to [transpile](https://en.wikipedia.org/wiki/Source-to-source_compiler) our code from es6 to regular every-browser-understands-it es5 JavaScript.
 
 Finally, we are going to pretend that we wrote SASS instead of CSS. We're not going to actually write SASS - we're just going to rename our `.css` files to `.scss`. Browsers do not natively understand `.scss` files, so we need a way to transpile those as well. While we're at it, we should probably add all the selector vendor prefixes so different browsers behave as expected.
 
@@ -155,9 +155,9 @@ We are going to use Gulp to process our separate stylesheets, converting SASS to
           |-- quote.scss
 ```
 
-Ta-da: _SASS_!
+**Et voilà: _SASS!_**
 
-We still need to tell Gulp to do the work, and that means we need a `gulpfile.js`.  Create one in your root project directory and begin be requiring all of our plugin modules:
+But we still need to tell Gulp to do the work, and that means we need a `gulpfile.js`.  Create one in your root project directory and begin be requiring all of our plugin modules:
 
 ```javascript
 /* gulpfile.js */
