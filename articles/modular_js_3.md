@@ -312,15 +312,7 @@ We can now replace the separate links to our application and module files with a
 
 As mentioned previously, manually re-running Gulp tasks after each minor code change adds an annoying interruption to our workflow. Gulp is supposed to make life easier. This section will introduce one of Gulp's greatest features: **watchers**. A watcher can automatically run tasks in response to specific events. We will write a watcher that _watches_ our source `.scss` files for changes, and in response runs our `styles` task.
 
-But before we do that, a word about running Gulp tasks. We ran the previous `styles` and `scripts` tasks by writing _gulp_ and the task's _name_ in our terminal. For example:
-
-`$ gulp scripts`
-
-But we can also define a default task, one that we execute without naming it, just by typing:
-
-`$ gulp`
-
-We'll write our watcher inside of this default task, so that we just have to type `gulp` in terminal and leave it alone - Gulp will continue to run, watching the specified files for changes, and running our task inresponse to those changes.  Add a new task after our `scripts` task: 
+But first we have to create a new _default_ task (unsurprisingly called `default`) to contain our watcher.  Add a new task after our `scripts` task: 
 
 ```javascript
 // default task contains our watcher
@@ -332,16 +324,40 @@ gulp.task('default', ['styles'], function() {
 });
 ```
 
-This task is constructed a little differently than our previous tasks. Notice the additional array we pass to `.task()` as its second argument - think of that as a "list" of the other tasks we'll be using inside this one.
+This task is constructed a little differently than our previous tasks. Notice the additional array we pass to `.task()` as its second argument - think of that as a list of the tasks we'll be using inside this one. We write our watcher inside the `default` task's callback using `gulp.watch()`. We pass two arguments to `.watch()`: the path of the files we watch to watch as a string, and an array of tasks to run when they change. 
 
-We write our watcher inside the `default` task's callback using `gulp.watch()`. We pass `.watch()` two arguments: the path of the files we watch to watch as a string, and an array of tasks to run when they change.
+Gulp `default` tasks can be exectued by just typing `gulp` - you do not need to use the task's name. Because it initiates a watcher, when we run the `default` task it executes but doesn't terminate - it stays running in our terminal because it's watching for additional changes to our files:
 
+![gulp watcher stays running](../assets/gulp-watch.png)
+
+So let's change something.  Currently, our quote text turns red (`color: #F33`) on hover - change try a light grey blue instead. Make the following change to `/src/css/quote.scss`:
+
+```css
+/* /src/css/quote.scss */
+
+#quote > a:hover {
+    color: #AAF;
+}
+```
+
+Save the file and watch your terminal window you'll see Gulp re-run our `styles` task in response to the changed file. Our `styles` task will have generated a brand new `/dist/css/quote-app.css`, so our change is live - reload your browser window:
+
+![screenshot after gulp watch](../assets/blue-hover.jpg)
+
+Instant production-ready CSS and no more work-flow interruption.
 
 ###Summarizing
 
+At the end of [part 2](https://medium.com/@jrschwane/writing-modular-javascript-pt-2-d7140d15c982), we had a perfectly functional modular application.  We could have left it at that; we had achieved our design goals after all.  But in the process, we introduced the potential for degraded performance: the browser has to make separate requests for all our modular files, which could negatively affect page load times.
 
-#That's It!
+Forseeing that problem, we used Gulp to process our source files and generate production-ready files in preparation for deployment.  We added vendor-prefixed selectors to our CSS, and concatenated, transpiled and minified our source files. Finally, we added a watcher so that we wouldn't need to manually rerun our tasks each time we made a change to our source stylesheets.
 
-Thanks, etc
+#Conclusion
 
-Now that we understand the principles of basic modular application design, we'll put them to use building a simple web application in [part 2](https://medium.com/@jrschwane/writing-modular-javascript-pt-2-d7140d15c982).
+This wraps up this series on writing modular JavaScript. It presents one method for planning and building modular applications that is easy to understand and implement, and does not require any exotic libraries or frameworks. This makes it well-suited for beginning JavaScript programmers.
+
+You might ask, "why _not_ use a framework?"  It's a fair question -  Angular for example, is modular by design. I have nothing against frameworks (I **love** Angular), but time is precious. The modular structure described in parts 1 and 2 of this series can be used by anyone - it does not require that you first gain proficiency with a framework's syntax and methods. And thinking in terms of modular application design _now_ will help you understand the 'why and how' of frameworks like Angular _later_.
+
+Ultimately, _modular design_ is more foundational and theoretical; framework or no framework, the applications you build on top of that foundation will benefit from thinking in terms of modules.  Hopefull you can repurpose these ideas in your own projects.
+
+In the mean time, enjoy the endless stream of mint juleps headed your way.

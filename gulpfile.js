@@ -44,13 +44,9 @@ gulp.task('scripts', function () {
 });
 
 
-// process javascript no sourcemaps
-gulp.task('scripts2', function () {
-    gulp.src(sourceJS)
-        .pipe(concat('quote-app2.min.js'))
-        .pipe(babel({
-            presets: ['es2015']
-        }))
-        .pipe(uglify())
-        .pipe(gulp.dest('dist/js'));
+// default task contains our watcher
+gulp.task('default', ['styles'], function () {
+    
+    gulp.watch('src/css/**/*', ['styles']);
+    
 });
