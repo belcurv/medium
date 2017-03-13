@@ -6,25 +6,27 @@ This is part 3 of a series on writing modular JavaScript applications. [Part 1](
 
 ###Introduction
 
-When we concluded part 2, we had a working modular web application.  We wrote our main our modules and their stylesheets as separate files, linked together in our `index.html` and main `app.js`. This is an efficient and scalable development process for all the reasons discussed in the previous two articles.
+When we concluded part 2, we had a working modular web application.  We wrote our main our modules and their stylesheets as separate files, linked together in our `index.html` and main `app.js`. This is an efficient and scalable development process for all the reasons discussed in the previous articles.
 
-But eight separate files (not including our font and jQuery) means our browser has to make eight separate http requests to fetch our application's files. Although browsers make requests in parallel and even though our files not large, in a larger project the cumulative latency of all those requests will delay our application's load time. We should always strive to increase performance, especially when it can be achieved with minimal effort.
+But it's a process that results in eight separate files (not including our 3rd-party font or jQuery). And that means means our browser has to open and maintain eight separate http requests to retrieve each of those files. Although our files not large and modern browsers make these requests in parallel, in a larger application the cumulative latency of all of those requests will result in slower page loads. That's never good - we should always strive to increase performance, especially when it can be achieved with minimal effort.
 
-We can further decrease load times through [minification](https://en.wikipedia.org/wiki/Minification_(programming). Minification is a form of compression where function and variable names are replaced with smaller characters, and comments, whitespace and line breaks are removed. This results in smaller file sizes, which results in quicker load times for clients.
+We can also increase performance through [minification](https://en.wikipedia.org/wiki/Minification_(programming)), a kind of compression where our function and variable names are replaced with single characters, and comments, whitespace and line breaks are removed. This (generally) results in smaller file sizes, which results in quicker page loads for clients.
 
-The demo application's code includes a feature of es6: [template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals).  Template literals are very useful, but their delimiting backticks can cause problems for some minifiers. To work around this problem, we need to [transpile](https://en.wikipedia.org/wiki/Source-to-source_compiler) our code from es6 to regular every-browser-understands-it es5 JavaScript.
+Our demo application includes a feature of es6/es2015: [template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals).  Template literals are amazingly useful, but their backtick delimiters cause problems for some code minifiers. To work around this problem, we should [transpile](https://en.wikipedia.org/wiki/Source-to-source_compiler) our source code from es6/es2015 to traditional every-browser-understands-it es5 JavaScript.
 
-Finally, we are going to pretend that we wrote SASS instead of CSS. We're not going to actually write SASS - we're just going to rename our `.css` files to `.scss`. Browsers do not natively understand `.scss` files, so we need a way to transpile those as well. While we're at it, we should probably add all the selector vendor prefixes so different browsers behave as expected.
+Finally, imagine that we wrote SASS instead of CSS. We won't actually rewrite our CSS - instead we'll cheat a little for demonstration purposes. Since browsers do not natively understand SASS, we should translate that into regular CSS. And while we're at it, we should probably add any necessary vendor-prefixed selectors to make browsers behave themselves.
 
-We will use [Gulp](http://gulpjs.com/) to solve each of the above problems.  This article describes an easy way to add Gulp to your workflow. We will cover concatenation (merging files together), minification (a form of code compression) and transpilation (translating one language or syntax to another). Gulp will process our source files, renaming and outputting them to a destination directory of our choosing.
+In this article, we will use [Gulp](http://gulpjs.com/) to efficiently deal with all of the above. Gulp will process our source files, creating new production-ready files we can use in preparation for deployment.
 
 ###Node.js and NPM
 
-This is also not a detailed tutorial on [Node.js](https://nodejs.org/en/) - [many resources exist](https://scotch.io/tag/node-js) that can do a more thorough job than I can. I assume you know what Node and NPM (the Node Package Manager) are and have them installed locally.  If you do not, please see the [official docs](https://nodejs.org/en/download/package-manager/).  We will only use two Node-specific features: `require` and `pipe`. The rest of our Gulp code will be regular JavaScript. We will, however, spend most of our time in the command line.
+Although this is not a detailed tutorial on [Node.js](https://nodejs.org/en/), I assume you know what Node and [NPM](https://www.npmjs.com/) are and have them installed locally. If you do not, please see the [official docs](https://nodejs.org/en/download/package-manager/) for installation instructions. If you need an introduction to Node, [Scotch.io](https://scotch.io/tag/node-js) has great tutorials and other resources.
+
+We need only two Node-specific functions: `require` and `pipe`. The rest of our Gulp code is regular JavaScript. We will spend a bit of time in the command line, but you don't need to be a terminal ninja.
 
 ###Application Structure
 
-When we wrapped up part 2 we were looking at this file/folder structure:
+We left part 2 with the following file/folder structure:
 
 ```
 |-- /src
@@ -46,32 +48,35 @@ When we wrapped up part 2 we were looking at this file/folder structure:
 | index.html
 ```
 
+In this article, we'll be working mainly in the root of our project folder.
+
 ###Initialization
 
-Before we can install and use Gulp, we need NPM to initialize our project. Open a terminal, navigate to your project's root directory and enter the following command:
+Before we can install and use Gulp, we need NPM to initialize our project. Open a terminal, navigate to your project's root directory and issue the following:
 
-`$ npm init -y`
+`npm init -y`
 
-If you omit the `-y` flag, NPM will ask you a series of questions about your project. The the `-y` flag accepts all the default answers to those questions. A new file has been created in your project's root directory: `package.json`. It lists several properties of your application (all based on the answers to `npm init`'s questions). We will not need to edit this file manually.
-
+You can omit the `-y` flag and NPM will ask you a series of questions about your project. The the `-y` just tells NPM to accept all the default answers. `npm init` creates a new `package.json` file in your project's root directory. It lists several properties of your application (all based on the answers to `npm init`'s questions). We will not need to edit this file manually.
 
 ###Gulp
 
-Gulp is a Node.js _task runner_.  It can perform a wide variety of tasks by itself, but will need to install some plugins to enable Gulp to do the work we need.  Gulp installs using NPM and is run from terminal commands.
+Gulp is a Node.js _task runner_.  It can perform some tasks on its own, but we will need to install some plugins before Gulp can solve the problems descrived in the introduction.
 
-There are three phases to installing Gulp. We install the global module first, then a local per-project module, and finally any plugin modules we need.  If you get errors installing Gulp globally, you may need to elevate your user priviledges. For example, in a Debian/Ubuntu environment you need to preface the installation command with `sudo`.  You do not need elevated priviledges to install the local Gulp package or any of the plugins we will be using.
+Gulp is run from the command line and installs using NPM. There are three phases to installing Gulp: install the global module first, then a local per-project module, and finally any plugins Gulp needs.
 
-Install Gulp globally first:
+>You may need elevated priviledges to instal Gulp globally. You'll know if the installation results in errors! In a Debian/Ubuntu environment you need to preface the installation command with `sudo`. You do not need elevated priviledges to install the _local_ Gulp package or any of the plugins we need.
 
-`$ sudo npm install gulp-cli -g`
+Install Gulp globally with the following command (`sudo` if needed):
 
-The `-g` flag instrcuts NPM to install the package globally - it will be available to use in any other file/folder path on your computer. Once that has finished, install Gulp locally. Make sure you are still in your demo project's root folder, and issue the following command:
+`npm install gulp-cli -g`
 
-`$ npm install gulp --save-dev`
+The `-g` flag instrcuts NPM to install the package globally - it will be available to use in any other project. Once that has finished, install Gulp locally. Make sure you are still in your demo project's root folder, and issue the following command:
 
-The `--save-dev` command-line switch tells NPM to register the package as a _developer dependency_ in `package.json`.  We will use that switch when installing all of the Gulp plugins as well.
+`npm install gulp --save-dev`
 
-If you open `package.json` now, you'll find that NPM has added a new `"devDependencies" : {...}` property with "gulp" listed as its sole dependency. All of our plugins will be registered here as we install them.  Let's do that now.
+The `--save-dev` command-line switch tells NPM to register the package as a _developer dependency_ in `package.json`.  We will use that switch again when installing all of our Gulp plugins.
+
+If you open `package.json` now, you'll see that NPM has added a new `"devDependencies" : {...}` property with "gulp" listed as its sole dependency. All of our various plugins will be registered here as we install them.  Let's do that now.
 
 We need the following plugins:
 
