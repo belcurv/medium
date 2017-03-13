@@ -47,6 +47,6 @@ gulp.task('scripts', function () {
 // default task contains our watcher
 gulp.task('default', ['styles'], function () {
     
-    gulp.watch('src/css/**/*', ['styles']);
+    gulp.watch('src/css/**/*.scss', ['styles']);
     
 });
