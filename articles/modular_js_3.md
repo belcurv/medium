@@ -50,19 +50,19 @@ We will work mainly in the root of our project folder; Gulp will be working on a
 
 ###Initialization
 
-Before we can install and use Gulp, use NPM to initialize a new project. While in our project’s root directory, issue the following terminal command:
+Begin by initializing a new project with NPM. While in our project’s root directory, issue the following terminal command:
 
 `npm init -y`
 
-You can omit the `-y` flag and NPM will ask you a series of questions about your project. `-y` just tells NPM to accept all the default answers. `npm init` creates a new `package.json` file in your project's root directory. It lists several properties of your application (all based on the answers to `npm init`'s questions).
+>If you omit the `-y` flag, NPM will ask you a series of questions about your project. `-y` just tells NPM to accept all the default answers. `npm init` creates a new `package.json` file in your project's root directory, populated with the answers to `npm init`'s questions.
 
 ###Gulp
 
-Gulp is a Node.js _task runner_.  It has limited functionality by itself  - we will need to install a series of plug-ins before Gulp can solve the problems described in the introduction.
+Gulp is a Node.js _task runner_ - it runs tasks that we will later write. But by itself, Gulp cannot satisfy the 'wants' we itemized in the introduction. To do so, we first need to install some plug-ins to give Gulp new abilities.
 
-Gulp runs in the command line and installs using NPM. There are three installation phases: first install Gulp globally, then install the local project module, and finally install any needed plug-ins.
+But before that, we need to install Gulp. Gulp runs in the command line and installs using NPM. There are three parts to its installation: install Gulp globally, then install the local project package, and finally install any needed plugins.
 
->You may need elevated priviledges to instal Gulp globally. You'll know if the installation errors out! In a Debian/Ubuntu environment you need to preface the installation command with `sudo`. Elevated privileges are not required to install the _local_ Gulp package or any of the plugins we need.
+>You may need elevated priviledges to instal Gulp globally. You'll know if your installation attempt errors out! In a Debian/Ubuntu environment you need to preface the installation command with `sudo`. Elevated privileges are not required to install the _local_ Gulp package or any of the plugins we need.
 
 Install the global Gulp package using the following command (`sudo` as needed):
 
@@ -72,15 +72,13 @@ Once that has finished, install Gulp locally. Make sure you are still in your de
 
 `npm install gulp --save-dev`
 
-The `--save-dev` command-line switch tells NPM to register the package as a _developer dependency_ in `package.json`.  We will use that switch again when installing our Gulp plugins.
-
-If you open `package.json` now, you'll see that it has a new `"devDependencies" : {...}` property listing "gulp" as its sole dependency. All of our various plugins will be registered here after we install them.  Let's do that now.
+The `--save-dev` command-line switch registers the package as a _developer dependency_ in `package.json`.  If you open `package.json` now, you'll see that it has a new `"devDependencies" : {...}` property listing "gulp" as its sole dependency. All our various plugins will be registered here after we install them.  Let's do that now.
 
 We need the following plugins:
 
 1.  [gulp-concat](https://www.npmjs.com/package/gulp-concat) - to concatenate (merge together) our separate JavaScript and SASS files
 
-2.  [gulp-sass](https://www.npmjs.com/package/gulp-sass) - to convert our `.scss` files into traditional `.css` files
+2.  [gulp-sass](https://www.npmjs.com/package/gulp-sass) - to convert SASS files into traditional `.css` files
 
 3.  [gulp-autoprefixer](https://www.npmjs.com/package/gulp-autoprefixer) - to automatically add vendor-prefixed selectors to our stylesheets based on [CanIUse](http://caniuse.com/) rules
 
@@ -88,13 +86,13 @@ We need the following plugins:
 
 5.  [babel-preset-es2015](https://www.npmjs.com/package/babel-preset-es2015) - a preset Babel configuration
 
-5.  [gulp-sourcemaps](https://www.npmjs.com/package/gulp-sourcemaps) - to generate a JavaScript [sourcemap](https://www.html5rocks.com/en/tutorials/developertools/sourcemaps/) so that when we're debugging we can make sense of the browser's console output
+6.  [gulp-sourcemaps](https://www.npmjs.com/package/gulp-sourcemaps) - to generate a JavaScript [sourcemap](https://www.html5rocks.com/en/tutorials/developertools/sourcemaps/) so that when we're debugging we can make sense of our browser's console output
 
-6.  [gulp-uglify](https://www.npmjs.com/package/gulp-uglify) - to minify our JavaScript
+7.  [gulp-uglify](https://www.npmjs.com/package/gulp-uglify) - to minify our JavaScript
 
 We install these plugins using NPM, again using the `--save-dev` switch to add each module to `package.json`. You can install each individually or all at once:
 
-`$ npm install gulp-concat gulp-sass gulp-autoprefixer gulp-babel babel-preset-es2015 gulp-sourcemaps gulp-uglify --save-dev`
+`npm install gulp-concat gulp-sass gulp-autoprefixer gulp-babel babel-preset-es2015 gulp-sourcemaps gulp-uglify --save-dev`
 
 You may have noticed the new `node_modules` folder that was created in your project’s root directory. NPM stores everything required by our dependencies in there. We will not need to touch anything in `node_modules`.
 
@@ -115,11 +113,25 @@ Our `"devDependencies"` object should now look like this (version numbers curren
 }
 ```
 
-Gulp has everything it needs to process our JavaScript and SASS files. Now let's put it to work.
+Gulp has everything it needs to process our JavaScript and SASS files. Before we can start writing tasks, we have to create a **gulpfile** to contain them.  Create a new `gulpfile.js` in your root project directory and begin by importing our plugin modules:
+
+```javascript
+/* gulpfile.js */
+
+var gulp         = require('gulp'),
+    concat       = require('gulp-concat'),
+    sass         = require('gulp-sass'),
+    autoprefixer = require('gulp-autoprefixer'),
+    sourcemaps   = require('gulp-sourcemaps'),
+    uglify       = require('gulp-uglify'),
+    babel        = require('gulp-babel');
+```
+
+We'll add our tasks below the module assignment above.
 
 ###Processing CSS
 
-We will use Gulp to process our separate stylesheets, convert SASS to CSS, add any necessary vendor-prefixed selectors and output the result as a single file. But we don’t technically have any SASS. Lucky for us, traditional CSS is also valid SASS, so we can fake it by just renaming the file extensions. In our project's `/src/css/` folder, rename all the `.css` files to `.scss`:
+We want Gulp to process our separate stylesheets, convert SASS to CSS, add any necessary vendor-prefixed selectors and output the result as a single file. But wait - we don't actually have any SASS. Lucky for us, traditional CSS is also valid SASS, so we can fake it by just renaming our file extensions. In our project's `/src/css/` folder, rename all the `.css` files to `.scss`:
 
 ```
 |-- /src
@@ -134,21 +146,7 @@ We will use Gulp to process our separate stylesheets, convert SASS to CSS, add a
 
 _Et voilà: SASS!_
 
-We now need to tell Gulp to do the work, and that means we need a **gulpfile**.  Create a `gulpfile.js` in your root project directory and begin by importing our plug-in modules:
-
-```javascript
-/* gulpfile.js */
-
-var gulp         = require('gulp'),
-    concat       = require('gulp-concat'),
-    sass         = require('gulp-sass'),
-    autoprefixer = require('gulp-autoprefixer'),
-    sourcemaps   = require('gulp-sourcemaps'),
-    uglify       = require('gulp-uglify'),
-    babel        = require('gulp-babel');
-```
-
-Gulp is a _task runner _ -  we need to give it a **task** before it will do any actual work. Gulp tasks are functions that accept two arguments: the task’s name (as a string) and a callback function:
+We're _finally_ ready to write our first Gulp task. Gulp tasks are methods that take two arguments: the task’s name (as a string) and an anonymous callback function:
 
 ```javascript
 // example
@@ -157,10 +155,9 @@ gulp.task('taskName', function () {
     // do stuff
 
 });
-
 ```
 
-Let's add a `styles` task to our `gulpfile.js` after the required modules:
+Create a `styles` task in our `gulpfile.js` after the module assignments:
 
 ```javascript
 /* gulpfile.js */
@@ -188,10 +185,10 @@ gulp.task('styles', function () {
 });
 ```
 
-Inside the callback, `gulp.src()` expects the location of our `.scss` files as a string.  The wildcard `/**/` instructs Gulp to look for matching files in `/src/css` _and its subfolders_ - especially handy if you elected to organize your project folders _by feature_. Then we `.pipe()` those source files through each of our plugins (the arguments passed to each `.pipe()`), processing them along the way:
+Inside the callback, we first give `gulp.src()` the location of our `.scss` files.  The strange-looking wildcard `/**/` instructs Gulp to look for matching files in `/src/css` _and its subfolders_.  This is especially handy if you elected to organize your project folders _by feature_. Then we `.pipe()` those source files through each of our plugins (the arguments passed to each subsequent `.pipe()`), processing them along the way:
 
-1.  The separate `.scss` files are first concatenated into a single `quote-app.scss` file
-2.  the concatenated `.scss` file is then converted to a standard `.css` file
+1.  The separate `.scss` source files are first concatenated into a single `quote-app.scss` file
+2.  that file is then converted to a standard `.css` file
 3.  then vendor-prefixed selectors are added based on the config object (ours targets the two most-recent browser versions)
 4.  finally, the processed CSS file is written to `/dist/css/` (Gulp will create folders if they don't already exist)
 
@@ -210,13 +207,13 @@ In `index.html`, we can now replace the four separate links to our original `/sr
 <link rel="stylesheet" href="dist/css/quote-app.css">
 ```
 
-If you make changes to your source `/src/css` files, those changes will not propagate to the production `/dist/css/quote-app.css` unless you re-run `gulp styles`.  That's annoying; we'll learn how to automate this process after we deal with our JavaScript.
+If you make changes to your source `/src/css` files, those changes will not propagate to the production `/dist/css/quote-app.css` until you re-run `gulp styles`.  That's annoying; we'll learn how to automate this process after dealing with our JavaScript.
 
 ###Processing JavaScript
 
-Before we write the task to process our JavaScript files, we need to mention a potential issue. In the preceding section we used `gulp.src('src/css/**/*.scss')` to grab any SASS files found in `src/css` and its subfolders. There’s no problem doing so with SASS/CSS because selector order doesn't matter - especially since we namespaced our selectors. But order is critical to our modules' JavaScript files - **our modules need to be initialized first** so that `app.js` can call their public methods.
+Before we write the task to process our JavaScript files, we need to mention a potential issue. In the preceding section we used `gulp.src('src/css/**/*.scss')` to grab any SASS files found in `src/css` and its subfolders. Gulp grabs them irrespective of their order. That's not necessarily a problem with SASS/CSS, especially since we namespaced our selectors. But order is critical with our JavaScript - **our modules need to be initialized first** so that their public methods exist to be called by `app.js`.
 
-We can specify the file order using an array containing our source file names. We'll pass this array to `gulp.src()` instead of a path string. Create the new array below our imported modules:
+We can enforce a specific file order by passing an array to `gulp.src()` consisting of our source file names. Create the new array below our imported modules:
 
 ```javascript
 /* gulpfile.js */
@@ -239,9 +236,11 @@ var sourceJS = [
 ];    
 ```
 
-Now we add a `scripts` task after our existing `styles` task:
+Now add a `scripts` task after our existing `styles` task:
 
 ```javascript
+/* gulpfile.js */
+
 /* ... snip ... */
 
 // process scripts
@@ -264,10 +263,10 @@ After passing our array of source files to `gulp.src` we `.pipe()` them from one
 
 1.  We first initialize the `sourcemaps` plugin
 2.  then we concatenate our separate files into a single `quote-app.min.js` file
-3.  Babel then transpiles the the file, converting any es6/es2015 to traditional es5 using the specified  Babel preset
+3.  Babel then transpiles this file, converting any es6/es2015 to es5 JavaScript using our Babel preset
 4.  then we minify the transpiled code
-5.  a sourcemap is appended to the the end of our JavaScript
-6.  and finally we output the processed file to `/dist/js/`
+5.  the generated sourcemap is appended to the the end of our code
+6.  and finally the processed file is written to `/dist/js/`
 
 Task #2: _done_. Now run it in your terminal: `gulp scripts`
 
@@ -286,31 +285,35 @@ We can now replace the separate links to each of our application and module file
 <script src="dist/js/quote-app.min.js"></script>
 ```
 
->You may have noticed that the total size of our four original files (5.3kB) is actually _less_ than our minified `quote-app.min.js` (12.3kB). That doesn’t seem right - what's going on? Our minified file grew in  size because we appended the sourcemap to it. If we omit `sourcemaps`, our minified file weighs in at a lithe 1.6kB.
+>You may have noticed that the total size of our four original files (5.3kB) is actually _less_ than our minified `quote-app.min.js` (12.3kB). That doesn’t seem right - what's going on? Our minified file grew in size because we appended the sourcemap to it. If we omit `sourcemaps`, our minified file weighs in at a lithe 1.6kB.
 
 ###Watching Files for Changes
 
-As mentioned earlier, manually re-running Gulp tasks after each minor code change adds an annoying interruption to our work flow. Gulp is supposed to make life easier. This section will introduce one of Gulp’s greatest features: **watchers**. A watcher can automatically run tasks in response to events. Ours will watch our source `.scss` files for changes, and run our `styles` task in response.
+Manually re-running Gulp tasks after each minor code change adds an annoying interruption to our work flow. Gulp is supposed to make life easier. And it does, with one of Gulp’s greatest features: **watchers**. A watcher automatically runs tasks in response to events. We will write one that watches our source `.scss` files for changes, and runs our `styles` task in response.
 
-But first we have to create a default task (unsurprisingly called `default`) to contain our watcher. Add this new task after our `scripts` task: 
+But first we'll create a `default` task to contain our watcher. Add it after our `scripts` task: 
 
 ```javascript
+/* gulpfile.js */
+
+/* ... snip ... */
+
 // default task contains our watcher
 gulp.task('default', ['styles'], function() {
     
-    // watch source sass files and convert on changes
+    // watch sass source files and convert on changes
     gulp.watch('src/css/**/*.scss', ['styles']);
 
 });
 ```
 
-This task’s construction a lightly different than our previous tasks. Notice the additional array passed to `.task()` as its second parameter - think of that as a list of the tasks we'll be using inside our `default` task. We write our watcher inside the task's callback using `gulp.watch()`. We pass it two parameters: the path to the files we want to watch, and an array of tasks to run when they change (we have only one task: `styles`).
+This task’s construction is slightly different than our previous tasks. Notice the additional array passed to `.task()` as its second parameter - think of that as a list of the tasks we'll be using inside our `default` task. Inside the task's callback, `gulp.watch()` takes two parameters: the path to the files we want to watch, and an array of tasks to run when they change (we have only one, our `styles` task).
 
-Gulp `default` tasks can be exectued by just typing `gulp` - we do not need to provide the task's name. Because it initiates a watcher, when we run our `default` task it will execute but not terminate -  it continues to run, watching for additional changes to our files:
+Gulp `default` tasks can be exectued by just typing `gulp` - we do not need to provide the task's name. Because this task initiates a watcher, when we run our `default` task it will execute but not terminate - it continues to run, watching for additional changes to our files:
 
 ![gulp watcher stays running](../assets/gulp-watch.png)
 
-So let's change something.  Currently, our quote text turns red (`color: #F33`) on hover - let's try a grey-blue instead. Make the following change to `/src/css/quote.scss`:
+So let's change something.  Our quote text currently turns red (`color: #F33`) on hover - let's try a blueish lavender instead. Make the following change to `/src/css/quote.scss`:
 
 ```css
 #quote > a:hover {
@@ -318,22 +321,24 @@ So let's change something.  Currently, our quote text turns red (`color: #F33`) 
 }
 ```
 
-Keep an eye on your terminal window and save the file  - you’ll see Gulp re-run our `styles` task in response to the save event. Our `styles` task has generated a new `/dist/css/quote-app.css`, so our change is live - reload your browser window and behold:
+Keep an eye on your terminal window and save the file - Gulp will automatically re-run our `styles` task in response to the save event. Since that task generates a new `/dist/css/quote-app.css`, you can reload your browser window to see the changes:
 
 ![screenshot after gulp watch](../assets/blue-hover.jpg)
 
-Automatic production-ready CSS and no more work-flow interruption.
+We now generate production-ready CSS automatically and without work-flow interruption.
 
 ###Summarizing
 
-At the end of [part 2](https://medium.com/@jrschwane/writing-modular-javascript-pt-2-d7140d15c982), we had a perfectly functional modular application. We could have left it at that; we had achieved our design goals after all. But in the process, we introduced the potential for degraded performance: the browser has to make separate requests for all our modular files, which could negatively affect page load times.
+At the end of [part 2](https://medium.com/@jrschwane/writing-modular-javascript-pt-2-d7140d15c982), we had a perfectly functional modular application. We could have left it at that; we had achieved our design goals after all. But in the process, we introduced the potential for degraded performance.
 
-Forseeing that problem, we used Gulp to process our source files and generate production-ready files in preparation for deployment. We added vendor-prefixed selectors to our CSS, and concatenated, transpiled and minified our source files. Finally, we added a watcher so that we wouldn’t need to manually rerun our task each time we made a change to our source stylesheets.
+Forseeing that problem, we used Gulp to process our source files and generate production-ready files in preparation for deployment. We added vendor-prefixed selectors to our CSS, transpiled our SASS and es6 to CSS and es5 JavaScript, and minified our scripts for additional performance. Finally, we added a watcher to automate our CSS processing in response to changes to our source stylesheets.
+
+Gulp is not the only build tool - [Webpack](https://webpack.github.io/) and [Grunt](https://gruntjs.com/) are very popular and do similar things.  We picked Gulp because of how quickly we can get results, which lets us spend more time developing applications.
 
 #Conclusion
 
-This wraps up this series on writing modular JavaScript. It presents one method for planning and building modular applications that is easy to understand and implement, and does not require any exotic libraries or frameworks. This makes it well-suited for beginning JavaScript programmers.
+This wraps up this series on writing modular JavaScript. It describes a method for planning and building modular applications that is easy to understand and implement, and does not require any exotic libraries or frameworks. This makes it well-suited for beginning JavaScript programmers.
 
-You might ask, "why _not_ use a framework?"  It's a fair question -  Angular for example, is modular by design. I have nothing against frameworks (I **love** Angular), but time is precious. The modular structure described in parts 1 and 2 of this series can be used by anyone - it does not require that you spend time first gaining proficiency with a framework's syntax and methods. And thinking in terms of modular application design _now_ will help you understand the 'why and how' of frameworks like Angular _later_.
+You might ask, "why _not_ use a framework?"  It's a fair question - Angular for example, is modular by design. I have nothing against frameworks (and I **love** Angular), but time is precious. The modular design structure described in this series can be used by anyone immediately - it does not require that you spend time first gaining proficiency in a framework's syntax and methods.
 
 But ultimately, _modular design_ is more foundational and theoretical; framework or no framework, the applications you build will benefit from a sound foundation in modular thinking.  I hope you can translate these ideas to your own projects.
