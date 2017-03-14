@@ -27,8 +27,8 @@ var Background = (function () {
             cat     = 'nature',
             size    = '1920x1080';
 
-        $.when(buildElement(`${baseUrl}/${cat}/${size}`))
-            .done(render);
+        buildElement(`${baseUrl}/${cat}/${size}`)
+            .then(render);
 
     }
 
