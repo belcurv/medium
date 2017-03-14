@@ -2,6 +2,8 @@
 
 This is part 2 in a series on writing modular JavaScript applications. [Part 1](https://medium.com/@jrschwane/writing-modular-javascript-pt-1-b42a3bd23685) explained why modularity is desirable and presented a simple modular application design structure. In this part we will actually build an application using those principles. In part 3 we will use Gulp, the Node task runner, to prepare our application for deployment.
 
+>Updated 14/3/2017 - Greeting module now exports public `displayMessage()` method, which is called by Quote module's `renderQuote()` method so that both elements render at the same time.
+
 ###Introduction
 
 In this instalment we will write a simple application applying the modular design concepts discussed in part 1 of the series. Our application will have multiple features, each controlled by its own module and written as a separate file.
@@ -142,8 +144,8 @@ var Background = (function() {
     var baseUrl = 'https://source.unsplash.com/category',
         cat     = 'nature',
         size    = '1920x1080';
-    $.when(buildElement(`${baseUrl}/${cat}/${size}`))
-      .done(render);
+    buildElement(`${baseUrl}/${cat}/${size}`)
+      .then(render);
   }
 
   
@@ -327,19 +329,21 @@ var Greeting = (function() {
   // main init method
   function init() {
     cacheDom();
-    displayMessage();
   }
     
     
   /* =============== export public methods =============== */
   return {
-    init: init
+    init: init,
+    displayMessage: displayMessage
   };
     
 }());
 ```
 
-This module crafts a custom greeting using a name from the `names` array and a specific  message that depends on the current time.  Add a `<script>` tag to `index.html` for our new module, and include a call to its public `init()` method in `app.js`:
+This module crafts a custom greeting using a name from the `names` array and a specific message that depends on the current time.  Our `init()` method just caches our DOM element.  And we return two public methods: `init` and `displayMessage`. This article previously called `displayMessage` within `init()`. Now we're publishing `displayMessage` separately because our quotes module will call it later.
+
+Add a `<script>` tag to `index.html` for our new module, and include a call to its public `init()` method in `app.js`:
 
 ```javascript
 /* /src/js/app.js */
@@ -374,8 +378,9 @@ Like we did with our previous modules, begin by defining what this module needs 
 1. cache DOM elements,
 2. fetch a random quote from a remote API,
 3. process the JSON response,
-4. render the quote to the DOM, and
-5. provide us some way to initialize it.
+4. _call our greeting module's public Greeting.displayMessage() method_
+5. render the quote to the DOM, and
+6. provide us some way to initialize it.
 
 > Note: you may have difficulty getting the API to respond if you are not serving your application from a proper server. Both Chrome and Firefox threw up CORS errors when I loaded the static files directly in those browsers. Brackets _Live Preview_ works fine. Hosting anywhere (GitHub pages, for example) would also work.
 
@@ -428,6 +433,9 @@ var Quote = (function () {
 
     // render
     function renderQuote(response) {
+    
+        // call Greeting module's public displayMessage() method
+        Greeting.displayMessage();
         
         DOM.$quoteLink
             .attr('target', '_blank')
@@ -462,6 +470,10 @@ var Quote = (function () {
 ```
 
 We use promise syntax again to coordinate the timing of the `.getJSON()` AJAX response with subsequent  function calls. In this case, once the request has successfully resolved,  we `.render()` the quote (wrapped in an anchor tag) and author's name.
+
+In a previous version of this article, our greeting module's `init()` method called its own renderer (`displayMessage()`). Although that works, it results in a diminished user experience: the greeting renders immediately, and then the quote renders after a short delay. This is because the quote module can't render until it receives a quote from the API. We can do better.
+
+Our modular structure makes it easy to improve upon the previous version. We refactored our greeting module to export its `displayMessage()` method instead of calling it internally. That allows any other module to call it. Since we want both features to render simultaneously, we add a call to `Greeting.displayMessage()` in our quote module's `renderQuote()` method. Now both features render at the same time.
 
 > Special thanks to Chris Coyier for granting permission to use his [Quotes on Design API](https://quotesondesign.com/api-v4-0/).  In addition to curating all those quotes, Chris also founded [CSS-Tricks](https://css-tricks.com) and co-founded [Codepen](http://codepen.io). **Huge thanks!**
 
