@@ -1,7 +1,7 @@
 /* /src/js/quote.js */
 
 /* jshint esversion:6 */
-/* globals $, document, console */
+/* globals $, Greeting, document, console */
 
 var Quote = (function () {
 
@@ -46,6 +46,8 @@ var Quote = (function () {
 
     // render
     function renderQuote(response) {
+        
+        Greeting.displayMessage();
         
         DOM.$quoteLink
             .attr('target', '_blank')

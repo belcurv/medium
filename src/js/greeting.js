@@ -61,7 +61,7 @@ var Greeting = (function() {
 	// main init method
     function init() {
         cacheDom();
-		displayMessage();
+		// displayMessage();
     }
     
     
@@ -69,7 +69,8 @@ var Greeting = (function() {
 	
     // export public methods
     return {
-        init: init
+        init: init,
+        displayMessage: displayMessage
     };
     
 }());
