@@ -1,10 +1,10 @@
-#Writing Modular JavaScript — Pt 2
+# Writing Modular JavaScript — Pt 2
 
 This is part 2 in a series on writing modular JavaScript applications. [Part 1](https://medium.com/@jrschwane/writing-modular-javascript-pt-1-b42a3bd23685) explained why modularity is desirable and presented a simple modular application design structure. In this part we will actually build an application using those principles. In part 3 we will use Gulp, the Node task runner, to prepare our application for deployment.
 
 >Updated 14/3/2017 - Greeting module now exports public `displayMessage()` method, which is called by Quote module's `renderQuote()` method so that both elements render at the same time.
 
-###Introduction
+### Introduction
 
 In this instalment we will write a simple application applying the modular design concepts discussed in part 1 of the series. Our application will have multiple features, each controlled by its own module and written as a separate file.
 
@@ -13,7 +13,7 @@ Remember that modular code helps satisfy the design goals we set in part 1: enco
 The demo application will be  simple by design — our goal is to understand the modular design concepts by putting them into practice, not to explore in-depth any features of the JavaScript language. You should have some familiarity with client-side / front-end JavaScript and jQuery. We use jQuery because it simplifies AJAX and DOM manipulation. We will use a few [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) and [es6 template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals), but nothing too abstract or complex.
 
 
-###Application Features
+### Application Features
 
 We are going to build a random quote application. If you've worked through [Free Code Camp](https://www.freecodecamp.com)'s front-end curriculum, you have probably already built one. We'll add a few extra features to ours for additional practice writing and wiring up modules.
 
@@ -26,7 +26,7 @@ Our application will consist of:
 3.  a **random quote** feature that makes an AJAX request to a remote API, processes the response and displays the quote in our view.
 
 
-###Application Structure
+### Application Structure
 
 We start with a simplified version of the _by type_ structure described in part 1 of this series. We don't need a `/dist` folder or anything related to Node just yet -  we'll add those in part 3. Begin by creating a project directory that contains the following files and sub-folders:
 
@@ -40,7 +40,7 @@ We start with a simplified version of the _by type_ structure described in part 
 | index.html
 ```
 
-###Initial Boilerplate
+### Initial Boilerplate
 
 Our `index.html` will load our separate application and module files, and define some "containers" for our feature modules to hook into. For now, we need a basic html5 document with a links to a font, our main stylesheet and jQuery, and `<div>`s for our features.
 
@@ -104,9 +104,9 @@ body {
 }
 ```
 
-With that out of the way, we can start writing our feature modules.
+Now we can start writing our feature modules.
 
-###Random Background Feature
+### Random Background Feature
 
 We already know that our application needs three features, but what about those features  - what do they need? You can easily structure your modules by answering that question.
 
@@ -250,7 +250,7 @@ The above CSS positions, sizes and anchors the image on the page, and sets the o
 
 That wraps up the random background feature  -  not too bad, right? The other modules follow a similar pattern.
 
-###Greeting Feature
+### Greeting Feature
 
 Define the module's requirements  -  this module needs to:
 
@@ -371,7 +371,7 @@ Let's quickly style our greeting.  Add a new file `greeting.css` to the `/src/cs
 
 Reload thy browser and be greeted!  On to our final feature...
 
-###Random Quote Feature
+### Random Quote Feature
 
 Like we did with our previous modules, begin by defining what this module needs to do:
 
@@ -566,7 +566,7 @@ Add a link to the stylesheet in `index.html` and we are done. Our final `index.h
 </html>
 ```
 
-###Summarizing
+### Summarizing
 
 If all went well, your browser should show you  something like this:
 
@@ -599,6 +599,6 @@ At this point our application structure looks like this:
 
 Looking good! Time to collect on all those promised mint juleps.
 
-#Up Next: Preparing for Deployment
+# Up Next: Preparing for Deployment
 
 Our application, modules and stylesheets are working together. But the browser has to make a separate request for each of those eight separate files. While the files themselves are not large, the cumulative latency of all those requests delays application load time. In Part 3 we will prepare our application for deployment using Gulp to concatenate, transpile, and minify our files.
