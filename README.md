@@ -6,4 +6,4 @@ Pt 1: https://medium.com/@jrschwane/writing-modular-javascript-pt-1-b42a3bd23685
 
 Pt 2: https://medium.com/@jrschwane/writing-modular-javascript-pt-2-d7140d15c982
 
-Pt 3: _ToDo_
+Pt 3: https://medium.com/@jrschwane/writing-modular-javascript-pt-3-d6db23330641
